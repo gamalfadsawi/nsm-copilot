@@ -1,0 +1,275 @@
+cp artifacts/file_generation/ttl=63d/output/nsm-ai-workspace.html artifacts/file_generation/ttl=63d/intermediate/nsm-ai-workspace.html.prev && python3 - << 'PY'
+path = "artifacts/file_generation/ttl=63d/output/nsm-ai-workspace.html"
+s = open(path).read()
+
+# 1. Update Cloud Sync button label to "Cloud / GitHub"
+old_cloud_btn = '''          <button id="btnCloudSync" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors" title="Sinkronkan database ke Google Sheets">
+            <i data-lucide="cloud" class="w-3.5 h-3.5 text-indigo-600"></i>
+            <span>Cloud Sync</span>
+          </button>'''
+
+new_cloud_btn = '''          <button id="btnCloudSync" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors" title="Sinkronkan database ke GitHub Gist atau Google Apps Script">
+            <i data-lucide="cloud" class="w-3.5 h-3.5 text-indigo-600"></i>
+            <span>Cloud / GitHub</span>
+          </button>'''
+
+assert old_cloud_btn in s, "Missing btnCloudSync"
+s = s.replace(old_cloud_btn, new_cloud_btn, 1)
+
+# 2. Add GitHub Gist Sync functions alongside Google Apps Script Cloud Sync
+old_cloud_logic = '''    function saveState() {
+      const json = JSON.stringify(state);
+      try {
+        if (hasPersistentStorage) localStorage.setItem(STORAGE_KEY, json);
+      } catch (e) {}
+      try {
+        window.name = WINDOW_NAME_PREFIX + json;
+      } catch (e) {}
+      if (getCloudSyncUrl()) {
+        clearTimeout(cloudSyncTimer);
+        cloudSyncTimer = setTimeout(() => { pushToCloudSync(true); }, 900);
+      }
+    }'''
+
+new_cloud_logic = '''    const GH_GIST_ID_KEY = 'nsm_gh_gist_id';
+    const GH_TOKEN_KEY = 'nsm_gh_token';
+    const DEFAULT_GH_GIST_ID = '';
+    const DEFAULT_GH_TOKEN = '';
+
+    function getGitHubConfig() {
+      let gistId = DEFAULT_GH_GIST_ID;
+      let token = DEFAULT_GH_TOKEN;
+      try {
+        gistId = localStorage.getItem(GH_GIST_ID_KEY) || gistId;
+        token = localStorage.getItem(GH_TOKEN_KEY) || token;
+      } catch (e) {}
+      return { gistId: gistId.trim(), token: token.trim() };
+    }
+
+    function setGitHubConfig(gistId, token) {
+      try {
+        localStorage.setItem(GH_GIST_ID_KEY, gistId.trim());
+        localStorage.setItem(GH_TOKEN_KEY, token.trim());
+      } catch (e) {}
+    }
+
+    async function pushToGitHubGist(silent = true) {
+      const { gistId, token } = getGitHubConfig();
+      if (!token) {
+        if (!silent) showToast('Masukkan GitHub Personal Access Token (scope: gist) terlebih dahulu.', 'error');
+        return false;
+      }
+      try {
+        const payload = {
+          description: 'NSM AI Copilot Database Backup',
+          public: false,
+          files: {
+            'nsm-ai-database.json': { content: JSON.stringify(state, null, 2) }
+          }
+        };
+        const endpoint = gistId
+          ? `https://api.github.com/gists/${encodeURIComponent(gistId)}`
+          : 'https://api.github.com/gists';
+        const method = gistId ? 'PATCH' : 'POST';
+        const res = await fetch(endpoint, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (data && data.id) {
+          setGitHubConfig(data.id, token);
+          const gistInput = document.getElementById('ghGistIdInput');
+          if (gistInput) gistInput.value = data.id;
+        }
+        if (!silent) showToast(`Database tersimpan ke GitHub Gist (${data.id}).`, 'success');
+        return true;
+      } catch (e) {
+        if (!silent) showToast('Gagal menyimpan ke GitHub Gist. Periksa Token (scope: gist) atau Gist ID.', 'error');
+        return false;
+      }
+    }
+
+    async function pullFromGitHubGist(silent = true) {
+      const { gistId, token } = getGitHubConfig();
+      if (!gistId) {
+        if (!silent) showToast('Masukkan Gist ID untuk memuat data dari GitHub.', 'error');
+        return false;
+      }
+      try {
+        const headers = { 'Accept': 'application/vnd.github+json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(`https://api.github.com/gists/${encodeURIComponent(gistId)}`, { headers });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const fileObj = data.files && (data.files['nsm-ai-database.json'] || Object.values(data.files)[0]);
+        if (fileObj && fileObj.content) {
+          const parsed = parseAndNormalizeState(fileObj.content);
+          if (parsed) {
+            state = parsed;
+            if (state.sales.length && !state.sales.some(s => s.id === selectedSalesId)) {
+              selectedSalesId = state.sales[0].id;
+            }
+            renderAll();
+            if (!silent) showToast('Database berhasil dimuat dari GitHub Gist.', 'success');
+            return true;
+          }
+        }
+      } catch (e) {
+        if (!silent) showToast('Gagal memuat data dari GitHub Gist.', 'error');
+      }
+      return false;
+    }
+
+    function saveState() {
+      const json = JSON.stringify(state);
+      try {
+        if (hasPersistentStorage) localStorage.setItem(STORAGE_KEY, json);
+      } catch (e) {}
+      try {
+        window.name = WINDOW_NAME_PREFIX + json;
+      } catch (e) {}
+      if (getCloudSyncUrl() || getGitHubConfig().token) {
+        clearTimeout(cloudSyncTimer);
+        cloudSyncTimer = setTimeout(() => {
+          if (getCloudSyncUrl()) pushToCloudSync(true);
+          if (getGitHubConfig().token && getGitHubConfig().gistId) pushToGitHubGist(true);
+        }, 1000);
+      }
+    }'''
+
+assert old_cloud_logic in s, "Missing saveState block"
+s = s.replace(old_cloud_logic, new_cloud_logic, 1)
+
+# 3. Enhance openCloudSyncModal() with GitHub Gist Sync & GitHub Pages section
+old_modal_start = "    function openCloudSyncModal() {"
+old_modal_end = "      });\n    }\n\n    function renderAll()"
+start_idx = s.index(old_modal_start)
+end_idx = s.index(old_modal_end)
+
+new_modal_fn = '''    function openCloudSyncModal() {
+      const currentUrl = getCloudSyncUrl();
+      const gh = getGitHubConfig();
+      const appsScriptSnippet = `function doGet() {
+  var val = PropertiesService.getScriptProperties().getProperty('NSM_DB') || '{}';
+  return ContentService.createTextOutput(val).setMimeType(ContentService.MimeType.JSON);
+}
+function doPost(e) {
+  PropertiesService.getScriptProperties().setProperty('NSM_DB', e.postData.contents);
+  return ContentService.createTextOutput('{"ok":true}').setMimeType(ContentService.MimeType.JSON);
+}`;
+
+      openModal('Cloud & GitHub Sync (Penyimpanan Permanen)', `
+        <div class="space-y-4 text-xs">
+          <!-- GitHub Gist & GitHub Pages Section -->
+          <div class="bg-slate-900 text-slate-100 rounded-xl p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="github" class="w-4 h-4 text-white"></i>
+                <span class="font-bold text-sm">Hubungkan ke GitHub (Gist Sync &amp; GitHub Pages)</span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold">Direkomendasikan</span>
+            </div>
+            <p class="text-[11px] text-slate-300 leading-relaxed">
+              <strong>Cara 1 (GitHub Pages):</strong> Upload file HTML ini ke repositori GitHub sebagai <code>index.html</code> lalu aktifkan <em>Settings &rarr; Pages</em>. Di URL GitHub Pages, data otomatis tersimpan permanen tanpa tereset saat refresh.<br/>
+              <strong>Cara 2 (GitHub Gist Sync):</strong> Simpan &amp; muat database JSON langsung ke GitHub Gist pribadi (bisa dipakai dari Google Sites maupun perangkat lain).
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-300 mb-1">GitHub Token (scope: <code>gist</code>)</label>
+                <input id="ghTokenInput" type="password" value="${gh.token}" placeholder="ghp_xxxxxxxxxxxx" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-300 mb-1">Gist ID (kosongkan untuk buat baru)</label>
+                <input id="ghGistIdInput" type="text" value="${gh.gistId}" placeholder="Otomatis terisi saat simpan baru" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs" />
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <button type="button" id="btnGhPull" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-semibold">Muat dari GitHub</button>
+              <button type="button" id="btnGhPush" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">Simpan ke GitHub Gist</button>
+            </div>
+          </div>
+
+          <!-- Google Apps Script Section -->
+          <div class="border-t border-slate-200 pt-3 space-y-2.5">
+            <p class="font-bold text-slate-900">Alternatif: Google Apps Script Web App</p>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] text-slate-600">Tempel di <strong>script.google.com</strong> &rarr; Deploy sebagai Web App (Anyone)</span>
+              <button type="button" id="btnCopyAppsScript" class="text-indigo-600 hover:underline font-semibold">Salin Kode</button>
+            </div>
+            <pre class="bg-slate-100 text-slate-800 p-2.5 rounded-lg text-[10px] overflow-x-auto leading-relaxed border border-slate-200">${appsScriptSnippet}</pre>
+            <form id="formCloudSync" class="space-y-2">
+              <input name="cloudUrl" type="url" value="${currentUrl}" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex gap-2">
+                  <button type="button" id="btnPullCloud" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold">Muat dari Google</button>
+                  <button type="button" id="btnPushCloud" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold">Simpan ke Google</button>
+                </div>
+                <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">Simpan URL</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `);
+
+      document.getElementById('btnGhPush').addEventListener('click', async () => {
+        const token = document.getElementById('ghTokenInput').value.trim();
+        const gistId = document.getElementById('ghGistIdInput').value.trim();
+        setGitHubConfig(gistId, token);
+        await pushToGitHubGist(false);
+      });
+      document.getElementById('btnGhPull').addEventListener('click', async () => {
+        const token = document.getElementById('ghTokenInput').value.trim();
+        const gistId = document.getElementById('ghGistIdInput').value.trim();
+        setGitHubConfig(gistId, token);
+        await pullFromGitHubGist(false);
+      });
+
+      document.getElementById('btnCopyAppsScript').addEventListener('click', () => {
+        copyTextFallback(appsScriptSnippet).then(() => showToast('Kode Apps Script disalin.', 'success'));
+      });
+      document.getElementById('formCloudSync').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const url = new FormData(e.target).get('cloudUrl').trim();
+        setCloudSyncUrl(url);
+        showToast(url ? 'URL Cloud Sync disimpan.' : 'URL Cloud Sync dikosongkan.', 'success');
+      });
+      document.getElementById('btnPullCloud').addEventListener('click', async () => {
+        const url = document.querySelector('#formCloudSync input[name="cloudUrl"]').value.trim();
+        if (url) setCloudSyncUrl(url);
+        await pullFromCloudSync(false);
+      });
+      document.getElementById('btnPushCloud').addEventListener('click', async () => {
+        const url = document.querySelector('#formCloudSync input[name="cloudUrl"]').value.trim();
+        if (url) setCloudSyncUrl(url);
+        await pushToCloudSync(false);
+      });
+    }
+
+    function renderAll()'''
+
+s = s[:start_idx] + new_modal_fn + s[end_idx + len(old_modal_end):]
+
+# 4. Auto-pull from GitHub Gist on DOMContentLoaded if configured
+old_dom_pull = '''      if (getCloudSyncUrl()) {
+        pullFromCloudSync(true);
+      }'''
+new_dom_pull = old_dom_pull + '''
+      if (getGitHubConfig().gistId) {
+        pullFromGitHubGist(true);
+      }'''
+assert old_dom_pull in s, "Missing DOMContentLoaded pull"
+s = s.replace(old_dom_pull, new_dom_pull, 1)
+
+open(path, "w").write(s)
+print("GitHub Gist Sync & GitHub Pages guidance patched successfully!")
+PY
+python3 skills/web-app-generation/scripts/check_web_app.py artifacts/file_generation/ttl=63d/output/nsm-ai-workspace.html --previous artifacts/file_generation/ttl=63d/intermediate/nsm-ai-workspace.html.prev
+GitHub Gist Sync & GitHub Pages guidance patched successfully!
+WARNING REMOVED_FEATURE   button 'Cloud Sync' existed before this edit and is gone. Restore it unless the user asked to remove it.
+0 error(s), 1 warning(s). Fix each finding and re-run; skip one only if it's clearly wrong for this app.
