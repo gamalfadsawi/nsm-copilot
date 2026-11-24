@@ -236,24 +236,38 @@
             <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 class="text-sm font-bold text-slate-900">Monitoring Request Sales &amp; Program Pusat Seluruh Sales</h3>
-                <p class="text-xs text-slate-500">Rekap beban request, penugasan proposal pusat ke KLPD, dan prioritas tindak lanjut NSM ke masing-masing sales.</p>
+                <p class="text-xs text-slate-500">Rekap beban request, penugasan proposal pusat ke KLPD, dan prioritas tindak lanjut NSM (maks. 10 baris/halaman).</p>
               </div>
-              <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">Prioritas Otomatis AI</span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <div class="relative">
+                  <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2"></i>
+                  <input id="monSearchInput" type="text" placeholder="Cari sales / area..." class="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-44 sm:w-52" />
+                </div>
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">Prioritas Otomatis AI</span>
+              </div>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th class="py-3 px-4">Sales &amp; Area</th>
-                    <th class="py-3 px-4">Request Sales Aktif</th>
-                    <th class="py-3 px-4">Program Pusat (Visit KLPD)</th>
-                    <th class="py-3 px-4">Status WA</th>
-                    <th class="py-3 px-4">Prioritas &amp; Keterangan Follow-Up NSM</th>
-                    <th class="py-3 px-4 text-right">Aksi</th>
+            <div class="w-full max-h-[460px] overflow-y-auto overflow-x-auto lg:overflow-x-visible">
+              <table class="w-full lg:table-fixed text-left border-collapse">
+                <thead class="sticky top-0 z-10 bg-slate-50 shadow-[0_1px_0_0_#e2e8f0]">
+                  <tr class="border-b border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <th class="py-2.5 px-3 w-[19%] bg-slate-50">Sales &amp; Area</th>
+                    <th class="py-2.5 px-3 w-[20%] bg-slate-50">Request Sales Aktif</th>
+                    <th class="py-2.5 px-3 w-[20%] bg-slate-50">Program Pusat (KLPD)</th>
+                    <th class="py-2.5 px-2.5 w-[11%] bg-slate-50">Status WA</th>
+                    <th class="py-2.5 px-3 w-[21%] bg-slate-50">Prioritas Follow-Up NSM</th>
+                    <th class="py-2.5 px-3 w-[9%] text-right bg-slate-50">Aksi</th>
                   </tr>
                 </thead>
                 <tbody id="dashboardMonitoringBody" class="divide-y divide-slate-100 text-xs"></tbody>
               </table>
+            </div>
+            <div id="monitoringPaginationBar" class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span id="monPageInfo" class="text-slate-600 font-medium">Menampilkan 0–0 dari 0 sales</span>
+              <div class="flex items-center gap-1.5">
+                <button id="btnMonPrev" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold disabled:opacity-40 disabled:pointer-events-none">Sebelumnya</button>
+                <span id="monPageNumbers" class="inline-flex items-center gap-1"></span>
+                <button id="btnMonNext" class="px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold disabled:opacity-40 disabled:pointer-events-none">Berikutnya</button>
+              </div>
             </div>
           </div>
 
@@ -1002,6 +1016,8 @@
     let state = loadState();
     let activeTab = 'dashboard';
     let selectedSalesId = state.sales[0]?.id || null;
+    let monitoringPage = 1;
+    const MONITORING_PER_PAGE = 10;
     let charts = { method: null, wa: null };
 
     function saveState() {
@@ -1292,50 +1308,98 @@
         'Butuh Eskalasi': 'bg-rose-100 text-rose-800'
       };
 
-      const sortedSales = [...state.sales].sort((a, b) => {
-        const order = { 'Tinggi': 0, 'Sedang': 1, 'Rendah': 2 };
-        return order[getFollowUpPriority(a).level] - order[getFollowUpPriority(b).level];
-      });
+      const qMon = (document.getElementById('monSearchInput')?.value || '').trim().toLowerCase();
+      const sortedSales = [...state.sales]
+        .filter(s => !qMon || s.nama.toLowerCase().includes(qMon) || s.area.toLowerCase().includes(qMon))
+        .sort((a, b) => {
+          const order = { 'Tinggi': 0, 'Sedang': 1, 'Rendah': 2 };
+          return order[getFollowUpPriority(a).level] - order[getFollowUpPriority(b).level];
+        });
 
-      sortedSales.forEach(s => {
+      const totalItems = sortedSales.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / MONITORING_PER_PAGE));
+      if (monitoringPage > totalPages) monitoringPage = totalPages;
+      if (monitoringPage < 1) monitoringPage = 1;
+
+      const startIdx = (monitoringPage - 1) * MONITORING_PER_PAGE;
+      const pageItems = sortedSales.slice(startIdx, startIdx + MONITORING_PER_PAGE);
+
+      const infoEl = document.getElementById('monPageInfo');
+      if (infoEl) {
+        infoEl.textContent = totalItems === 0
+          ? 'Tidak ada data sales yang cocok'
+          : `Menampilkan ${startIdx + 1}–${Math.min(startIdx + MONITORING_PER_PAGE, totalItems)} dari ${totalItems} sales (Hal. ${monitoringPage}/${totalPages})`;
+      }
+
+      const prevBtn = document.getElementById('btnMonPrev');
+      const nextBtn = document.getElementById('btnMonNext');
+      if (prevBtn) prevBtn.disabled = monitoringPage <= 1;
+      if (nextBtn) nextBtn.disabled = monitoringPage >= totalPages;
+
+      const pageNumsEl = document.getElementById('monPageNumbers');
+      if (pageNumsEl) {
+        pageNumsEl.innerHTML = '';
+        for (let p = 1; p <= totalPages; p++) {
+          const pBtn = document.createElement('button');
+          pBtn.textContent = p;
+          pBtn.className = p === monitoringPage
+            ? 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-semibold'
+            : 'px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-medium';
+          pBtn.addEventListener('click', () => {
+            monitoringPage = p;
+            renderDashboardMonitoring();
+            if (window.lucide) lucide.createIcons();
+          });
+          pageNumsEl.appendChild(pBtn);
+        }
+      }
+
+      if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 px-4 text-center text-xs text-slate-400 italic">Tidak ada data sales yang sesuai filter.</td></tr>`;
+        return;
+      }
+
+      pageItems.forEach(s => {
         const activeReqs = state.requests.filter(r => r.salesId === s.id && r.status !== 'Selesai');
         const activeProgs = (state.programs || []).filter(p => p.salesId === s.id && p.status !== 'Follow-Up Selesai');
         const prio = getFollowUpPriority(s);
 
         const reqSummary = activeReqs.length
-          ? activeReqs.map(r => `<div class="truncate max-w-[210px]">• <span class="font-medium text-slate-800">${escapeHtml(r.instansi)}</span> <span class="text-[10px] text-slate-500">(${escapeHtml(r.status)})</span></div>`).join('')
-          : '<span class="text-slate-400 italic">Tidak ada request aktif</span>';
+          ? activeReqs.slice(0, 2).map(r => `<div class="truncate" title="${escapeHtml(r.instansi)} (${escapeHtml(r.status)})">• <span class="font-medium text-slate-800">${escapeHtml(r.instansi)}</span> <span class="text-[10px] text-slate-500">(${escapeHtml(r.status)})</span></div>`).join('')
+            + (activeReqs.length > 2 ? `<div class="text-[10px] text-indigo-600 font-medium">+${activeReqs.length - 2} request lainnya</div>` : '')
+          : '<span class="text-slate-400 italic text-[11px]">Tidak ada request aktif</span>';
 
         const progSummary = activeProgs.length
-          ? activeProgs.map(p => `<div class="truncate max-w-[210px]">• <span class="font-medium text-slate-800">${escapeHtml(p.klpd)}</span> <span class="text-[10px] text-slate-500">(${escapeHtml(p.status)})</span></div>`).join('')
-          : '<span class="text-slate-400 italic">Belum ada program pusat</span>';
+          ? activeProgs.slice(0, 2).map(p => `<div class="truncate" title="${escapeHtml(p.klpd)} (${escapeHtml(p.status)})">• <span class="font-medium text-slate-800">${escapeHtml(p.klpd)}</span> <span class="text-[10px] text-slate-500">(${escapeHtml(p.status)})</span></div>`).join('')
+            + (activeProgs.length > 2 ? `<div class="text-[10px] text-sky-600 font-medium">+${activeProgs.length - 2} program lainnya</div>` : '')
+          : '<span class="text-slate-400 italic text-[11px]">Belum ada program pusat</span>';
 
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition-colors align-top';
         tr.innerHTML = `
-          <td class="py-3.5 px-4 whitespace-nowrap">
-            <p class="font-bold text-slate-900">${escapeHtml(s.nama)}</p>
-            <p class="text-[11px] text-slate-500">${escapeHtml(s.area)}</p>
+          <td class="py-3 px-3 break-words">
+            <p class="font-bold text-slate-900 leading-snug">${escapeHtml(s.nama)}</p>
+            <p class="text-[11px] text-slate-500 leading-snug mt-0.5 line-clamp-2" title="${escapeHtml(s.area)}">${escapeHtml(s.area)}</p>
           </td>
-          <td class="py-3.5 px-4 space-y-1">
-            <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 mb-1">${activeReqs.length} Aktif</span>
+          <td class="py-3 px-3 space-y-1 min-w-0">
+            <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700">${activeReqs.length} Aktif</span>
             ${reqSummary}
           </td>
-          <td class="py-3.5 px-4 space-y-1">
-            <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 mb-1">${activeProgs.length} Aktif</span>
+          <td class="py-3 px-3 space-y-1 min-w-0">
+            <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-50 text-sky-700">${activeProgs.length} Aktif</span>
             ${progSummary}
           </td>
-          <td class="py-3.5 px-4 whitespace-nowrap">
-            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${waBadge[s.waStatus] || 'bg-slate-100 text-slate-600'}">${escapeHtml(s.waStatus)}</span>
+          <td class="py-3 px-2.5">
+            <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full leading-tight ${waBadge[s.waStatus] || 'bg-slate-100 text-slate-600'}">${escapeHtml(s.waStatus)}</span>
           </td>
-          <td class="py-3.5 px-4 max-w-xs">
+          <td class="py-3 px-3 break-words">
             <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${prio.badge}">Prioritas ${escapeHtml(prio.level)}</span>
             <p class="text-[11px] text-slate-600 mt-1 leading-snug">${escapeHtml(prio.reason)}</p>
           </td>
-          <td class="py-3.5 px-4 text-right whitespace-nowrap">
-            <button data-dash-wa="${escapeHtml(s.id)}" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold inline-flex items-center gap-1">
+          <td class="py-3 px-3 text-right">
+            <button data-dash-wa="${escapeHtml(s.id)}" class="px-2 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold inline-flex items-center gap-1" title="Follow-Up WA ${escapeHtml(s.nama)}">
               <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-              <span>Follow-Up</span>
+              <span>WA</span>
             </button>
           </td>
         `;
@@ -1574,7 +1638,6 @@
         ? '*[Request Sales]*\n' + reqs.map((r, i) => `${i + 1}. *${r.instansi}* — ${r.kategori} (Status: ${r.status})`).join('\n')
         : '';
 
-      // Topik 1: Prioritas Jadwal Kunjungan atas Program Pusat Proposal/RAB
       if (topic === 'prioritas_jadwal') {
         if (tone === 'tegas') {
           return `Halo ${sales.nama}, selamat pagi.\n\nSesuai monitoring NSM untuk area *${sales.area}*, mohon prioritaskan *jadwal kunjungan lapangan* atas Proposal/RAB Program Pusat berikut:\n\n${progScheduleLines}\n\nMohon konfirmasi kepastian hari & jam visit ke pejabat KLPD/PPK terkait hari ini maksimal pukul 15.00 WIB agar dukungan dari pusat bisa kita kawal penuh. Terima kasih.`;
@@ -1585,7 +1648,6 @@
         return `Selamat pagi ${sales.nama}, semoga aktivitas di *${sales.area}* lancar hari ini.\n\nMenindaklanjuti Proposal/RAB dari Pusat yang sudah disiapkan, mohon jadikan *prioritas jadwal kunjungan* ke relasi KLPD berikut minggu ini:\n\n${progScheduleLines}\n\nMohon infokan rencana tanggal visit-nya dan apakah ada bahan tambahan dari pusat yang perlu disiapkan sebelum bertemu PPK/pejabat terkait. Terima kasih!`;
       }
 
-      // Topik 2: Follow-Up atas Proposal/RAB Setelah Kunjungan
       if (topic === 'followup_setelah_visit') {
         const listAfterVisit = [progAfterVisitLines, reqLines].filter(Boolean).join('\n\n')
           || '- Mohon update hasil kunjungan terbaru ke relasi KLPD/Dinas di area Anda minggu ini.';
@@ -1598,7 +1660,6 @@
         return `Selamat pagi ${sales.nama}, terima kasih atas kunjungan lapangan yang sudah dijalankan di *${sales.area}*.\n\nSaya ingin *follow-up hasil kunjungan atas Proposal/RAB* yang sudah disampaikan ke relasi KLPD berikut:\n\n${listAfterVisit}\n\nBagaimana tanggapan dari PPK/pejabat setempat setelah paparan proposal? Jika diperlukan penyesuaian RAB, surat dukungan, atau approval diskon khusus dari NSM untuk mengunci peluangnya, langsung sampaikan ya. Terima kasih!`;
       }
 
-      // Topik 3: Gabungan Request Sales & Program Pusat
       const progBlock = progs.length
         ? '*[Program Pusat — Visit KLPD]*\n' + progs.map((p, i) => `${i + 1}. *${p.klpd} (${p.satker})* — ${p.judul} (Target: ${p.targetVisit})`).join('\n')
         : '';
@@ -3028,6 +3089,24 @@
       showToast('Analisis AI NSM diperbarui.', 'info');
     });
 
+    document.getElementById('monSearchInput')?.addEventListener('input', () => {
+      monitoringPage = 1;
+      renderDashboardMonitoring();
+      if (window.lucide) lucide.createIcons();
+    });
+    document.getElementById('btnMonPrev')?.addEventListener('click', () => {
+      if (monitoringPage > 1) {
+        monitoringPage--;
+        renderDashboardMonitoring();
+        if (window.lucide) lucide.createIcons();
+      }
+    });
+    document.getElementById('btnMonNext')?.addEventListener('click', () => {
+      monitoringPage++;
+      renderDashboardMonitoring();
+      if (window.lucide) lucide.createIcons();
+    });
+
     ['sirupSearch', 'sirupFilterType', 'sirupFilterMethod', 'sirupFilterFund', 'sirupFilterScore'].forEach(id => {
       document.getElementById(id).addEventListener('input', renderSirup);
     });
@@ -3096,6 +3175,7 @@
       document.getElementById('confirmResetBtn').addEventListener('click', () => {
         state = parseAndNormalizeState(DEFAULT_DATA);
         selectedSalesId = state.sales[0].id;
+        monitoringPage = 1;
         saveState();
         closeModal();
         renderAll();
