@@ -75,7 +75,7 @@
           <p class="text-xs text-slate-200 font-medium">Jadwal rutin: Senin &amp; Kamis</p>
           <p id="syncStatusText" class="text-[11px] text-emerald-400 mt-1 flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
-            <span>Menghubungkan penyimpanan...</span>
+            <span>Tersimpan otomatis di browser</span>
           </p>
         </div>
         <button id="btnResetDemo" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors">
@@ -492,11 +492,7 @@
   <!-- TOAST -->
   <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+  <script>
     const STORAGE_KEY = 'nsm_ai_copilot_v1';
     const WINDOW_NAME_PREFIX = 'NSM_AI_STATE_V1:';
 
@@ -831,90 +827,6 @@
     let selectedSalesId = state.sales[0]?.id || null;
     let charts = { method: null, wa: null };
 
-    let db = null;
-    let currentUser = null;
-    let cloudSaveTimer = null;
-    let isApplyingRemote = false;
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'nsm-ai-copilot';
-
-    function updateSyncStatus(text, isReady = true) {
-      const el = document.getElementById('syncStatusText');
-      if (!el) return;
-      const dotClass = isReady ? 'bg-emerald-400' : 'bg-amber-400';
-      const textClass = isReady ? 'text-emerald-400' : 'text-amber-300';
-      el.className = `text-[11px] ${textClass} mt-1 flex items-center gap-1.5`;
-      el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${dotClass} inline-block"></span><span>${escapeHtml(text)}</span>`;
-    }
-
-    async function initCloudPersistence() {
-      try {
-        if (typeof __firebase_config === 'undefined') {
-          updateSyncStatus('Tersimpan lokal & Siap Ekspor', true);
-          return;
-        }
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const fbApp = initializeApp(firebaseConfig);
-        const auth = getAuth(fbApp);
-        db = getFirestore(fbApp);
-
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          const cred = await signInWithCustomToken(auth, __initial_auth_token);
-          currentUser = cred.user;
-        } else {
-          const cred = await signInAnonymously(auth);
-          currentUser = cred.user;
-        }
-
-        if (!currentUser) return;
-
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'nsm_workspace', 'main_db');
-        onSnapshot(docRef, (snap) => {
-          if (snap.exists()) {
-            const data = snap.data();
-            if (data && data.payload) {
-              const parsed = parseAndNormalizeState(data.payload);
-              if (parsed) {
-                isApplyingRemote = true;
-                state = parsed;
-                if (state.sales.length && !state.sales.some(s => s.id === selectedSalesId)) {
-                  selectedSalesId = state.sales[0].id;
-                }
-                try {
-                  if (hasPersistentStorage) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                  window.name = WINDOW_NAME_PREFIX + JSON.stringify(state);
-                } catch (e) {}
-                renderAll();
-                isApplyingRemote = false;
-                updateSyncStatus('Tersimpan otomatis di Cloud', true);
-              }
-            }
-          } else {
-            pushStateToCloud();
-          }
-        }, (err) => {
-          updateSyncStatus('Mode lokal (Gunakan Simpan DB)', false);
-        });
-      } catch (e) {
-        updateSyncStatus('Mode lokal (Gunakan Simpan DB)', false);
-      }
-    }
-
-    async function pushStateToCloud() {
-      if (!db || !currentUser || isApplyingRemote) return;
-      try {
-        updateSyncStatus('Menyimpan perubahan...', false);
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'nsm_workspace', 'main_db');
-        await setDoc(docRef, {
-          payload: JSON.stringify(state),
-          updatedAt: new Date().toISOString(),
-          updatedBy: currentUser.uid
-        });
-        updateSyncStatus('Tersimpan otomatis di Cloud', true);
-      } catch (e) {
-        updateSyncStatus('Gagal sinkron Cloud', false);
-      }
-    }
-
     function saveState() {
       const json = JSON.stringify(state);
       try {
@@ -923,12 +835,6 @@
       try {
         window.name = WINDOW_NAME_PREFIX + json;
       } catch (e) {}
-      if (db && currentUser && !isApplyingRemote) {
-        clearTimeout(cloudSaveTimer);
-        cloudSaveTimer = setTimeout(() => {
-          pushStateToCloud();
-        }, 500);
-      }
     }
 
     function formatRupiah(num) {
@@ -2708,12 +2614,6 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
-      if (getCloudSyncUrl()) {
-        pullFromCloudSync(true);
-      }
-      if (getGitHubConfig().gistId) {
-        pullFromGitHubGist(true);
-      }
     });
   </script>
 </body>
