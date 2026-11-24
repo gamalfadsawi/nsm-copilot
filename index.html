@@ -725,22 +725,34 @@
 
     function normalizeExcelDate(val, fallback = '') {
       if (val === null || val === undefined || val === '') return fallback;
+      const toLocalYMD = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
       if (val instanceof Date && !isNaN(val.getTime())) {
-        return val.toISOString().slice(0, 10);
+        return toLocalYMD(val);
       }
       const str = String(val).trim();
-      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+      if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
       if (/^\d{5}(\.\d+)?$/.test(str)) {
         const serial = parseFloat(str);
         if (serial >= 20000 && serial <= 80000) {
           const utcMs = Math.round((serial - 25569) * 86400 * 1000);
           const d = new Date(utcMs);
-          if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+          if (!isNaN(d.getTime())) {
+            return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+          }
         }
       }
       const dmy = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
       if (dmy) {
         return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
+      }
+      if (/GMT[+-]\d{4}|^\w{3}\s+\w{3}\s+\d{1,2}\s+\d{4}/.test(str)) {
+        const parsed = new Date(str);
+        if (!isNaN(parsed.getTime())) return toLocalYMD(parsed);
       }
       return str;
     }
@@ -1007,7 +1019,7 @@
           pagu: Number(p.pagu) || 0,
           metode: String(p.metode || 'E-Purchasing').trim(),
           sumberDana: String(p.sumberDana || 'APBD').trim(),
-          jadwal: String(p.jadwal || '-').trim(),
+          jadwal: normalizeExcelDate(p.jadwal, '-'),
           status: String(p.status || 'Peluang Baru').trim(),
           notes: String(p.notes || '').trim()
         }));
@@ -1053,7 +1065,10 @@
           sirupId: String(p.sirupId || '').trim(),
           salesId: String(p.salesId || '').trim(),
           ringkasanProposal: String(p.ringkasanProposal || '').trim(),
-          hasilKunjungan: normalizeExcelDate(p.hasilKunjungan, '') ? String(p.hasilKunjungan || '').trim() : String(p.hasilKunjungan || '').trim()
+          targetVisit: normalizeExcelDate(p.targetVisit, getTodayISO()),
+          status: String(p.status || 'Siap Visit').trim(),
+          waReportStatus: String(p.waReportStatus || 'Belum Di-WA').trim(),
+          hasilKunjungan: String(p.hasilKunjungan || '').trim()
         }));
         if (!Array.isArray(parsed.completedDailyTasks)) {
           parsed.completedDailyTasks = [];
@@ -3006,7 +3021,7 @@
                 pagu: Number(String(r.Pagu_Rp || r.pagu || 0).replace(/[^\d]/g, '')) || 0,
                 metode: String(r.Metode_Pemilihan || r.metode || 'E-Purchasing').trim(),
                 sumberDana: String(r.Sumber_Dana || r.sumberDana || 'APBD').trim(),
-                jadwal: String(r.Jadwal_Pemilihan || r.jadwal || '2027').trim(),
+                jadwal: normalizeExcelDate(r.Jadwal_Pemilihan ?? r.jadwal, '2027'),
                 status: String(r.Status || r.status || 'Peluang Baru').trim(),
                 notes: String(r.Catatan || r.notes || 'Diimpor dari Excel').trim()
               })).filter(x => x.namaPaket);
