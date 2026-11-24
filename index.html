@@ -241,7 +241,7 @@
               <div class="flex items-center gap-2 flex-wrap">
                 <div class="relative">
                   <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2"></i>
-                  <input id="monSearchInput" type="text" placeholder="Cari sales / area..." class="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-44 sm:w-52" />
+                  <input id="monSearchInput" type="text" placeholder="Cari ID, nama sales, atau area..." class="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 sm:w-56" />
                 </div>
                 <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">Prioritas Otomatis AI</span>
               </div>
@@ -250,9 +250,9 @@
               <table class="w-full lg:table-fixed text-left border-collapse">
                 <thead class="sticky top-0 z-10 bg-slate-50 shadow-[0_1px_0_0_#e2e8f0]">
                   <tr class="border-b border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th class="py-2.5 px-3 w-[19%] bg-slate-50">Sales &amp; Area</th>
-                    <th class="py-2.5 px-3 w-[20%] bg-slate-50">Request Sales Aktif</th>
-                    <th class="py-2.5 px-3 w-[20%] bg-slate-50">Program Pusat (KLPD)</th>
+                    <th class="py-2.5 px-3 w-[21%] bg-slate-50">Sales &amp; Area</th>
+                    <th class="py-2.5 px-3 w-[19%] bg-slate-50">Request Sales Aktif</th>
+                    <th class="py-2.5 px-3 w-[19%] bg-slate-50">Program Pusat (KLPD)</th>
                     <th class="py-2.5 px-2.5 w-[11%] bg-slate-50">Status WA</th>
                     <th class="py-2.5 px-3 w-[21%] bg-slate-50">Prioritas Follow-Up NSM</th>
                     <th class="py-2.5 px-3 w-[9%] text-right bg-slate-50">Aksi</th>
@@ -467,7 +467,7 @@
                 </div>
                 <div class="relative">
                   <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2"></i>
-                  <input id="waSearchSales" type="text" placeholder="Cari nama sales atau area..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <input id="waSearchSales" type="text" placeholder="Cari ID, nama sales, atau area..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
               </div>
               <div id="salesFollowUpList" class="divide-y divide-slate-100 max-h-[580px] overflow-y-auto"></div>
@@ -479,14 +479,16 @@
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-3">
                   <div>
                     <div class="flex items-center gap-2 flex-wrap">
+                      <span id="selSalesIdBadge" class="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">-</span>
                       <h4 id="selSalesName" class="text-base font-bold text-slate-900">-</h4>
+                      <span id="selSalesRoleBadge" class="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700">-</span>
                       <span id="selSalesBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">-</span>
                       <button id="btnEditSales" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors" title="Edit atau Hapus Sales">
                         <i data-lucide="pencil" class="w-3 h-3"></i>
                         <span>Edit Sales</span>
                       </button>
                     </div>
-                    <p id="selSalesMeta" class="text-xs text-slate-500 mt-0.5">-</p>
+                    <p id="selSalesMeta" class="text-xs text-slate-500 mt-1">-</p>
                   </div>
                   <div class="flex flex-wrap items-center gap-2">
                     <select id="waToneSelect" class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">
@@ -642,6 +644,33 @@
     const STORAGE_KEY = 'nsm_ai_copilot_v1';
     const WINDOW_NAME_PREFIX = 'NSM_AI_STATE_V1:';
 
+    const SALES_ROLE_MAP = {
+      SP: 'Sales Project',
+      SR: 'Sales Reguler',
+      MP: 'Manager Project',
+      BM: 'Branch Manager',
+      RKN: 'Rekanan'
+    };
+
+    function getRoleLabelFromId(id, explicitRole = '') {
+      if (explicitRole) return explicitRole;
+      const prefix = String(id || '').split('-')[0].toUpperCase();
+      return SALES_ROLE_MAP[prefix] || 'Sales';
+    }
+
+    function generateNextSalesId(prefix = 'SP') {
+      const cleanPrefix = String(prefix || 'SP').toUpperCase().replace(/[^A-Z]/g, '') || 'SP';
+      let maxNum = 0;
+      state.sales.forEach(s => {
+        const m = String(s.id || '').toUpperCase().match(new RegExp('^' + cleanPrefix + '-(\\d+)$'));
+        if (m) {
+          const num = parseInt(m[1], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+      return `${cleanPrefix}-${String(maxNum + 1).padStart(2, '0')}`;
+    }
+
     function getTodayISO() {
       const now = new Date();
       const offsetMs = now.getTimezoneOffset() * 60000;
@@ -755,7 +784,8 @@
       ],
       sales: [
         {
-          id: 'SLS-01',
+          id: 'SP-01',
+          jabatan: 'Sales Project',
           nama: 'Budi Santoso',
           area: 'Jawa Tengah (Solo Raya & Klaten)',
           wa: '6281234567890',
@@ -775,7 +805,8 @@
           ]
         },
         {
-          id: 'SLS-02',
+          id: 'SR-01',
+          jabatan: 'Sales Reguler',
           nama: 'Rina Wijaya',
           area: 'DI Yogyakarta (Sleman & Bantul)',
           wa: '6281398765432',
@@ -795,7 +826,8 @@
           ]
         },
         {
-          id: 'SLS-03',
+          id: 'MP-01',
+          jabatan: 'Manager Project',
           nama: 'Andi Pratama',
           area: 'Semarang & Pantura',
           wa: '6281511223344',
@@ -815,7 +847,8 @@
           ]
         },
         {
-          id: 'SLS-04',
+          id: 'BM-01',
+          jabatan: 'Branch Manager',
           nama: 'Dedi Kurniawan',
           area: 'Jabodetabek',
           wa: '6281788990011',
@@ -838,7 +871,7 @@
       requests: [
         {
           id: 'REQ-101',
-          salesId: 'SLS-01',
+          salesId: 'SP-01',
           instansi: 'Dinas Pendidikan Kab. Klaten',
           kategori: 'Sampel Buku & Daftar Harga',
           detail: 'Minta 2 paket sampel buku teks pendamping SD/SMP + brosur harga e-Katalog untuk dibawa ke PPK.',
@@ -850,7 +883,7 @@
         },
         {
           id: 'REQ-102',
-          salesId: 'SLS-02',
+          salesId: 'SR-01',
           instansi: 'Dinas Pendidikan Kab. Sleman',
           kategori: 'Penawaran Harga / RAB',
           detail: 'RAB rincian 15 judul buku pengayaan literasi numerasi sesuai pagu Rp 185 jt.',
@@ -862,7 +895,7 @@
         },
         {
           id: 'REQ-103',
-          salesId: 'SLS-03',
+          salesId: 'MP-01',
           instansi: 'Disarpus Prov. Jateng',
           kategori: 'Revisi / Tayang Katalog',
           detail: 'Pastikan 40 judul buku pojok baca sudah tayang di Etalase Buku Pendidikan Katalog V6.',
@@ -874,7 +907,7 @@
         },
         {
           id: 'REQ-104',
-          salesId: 'SLS-04',
+          salesId: 'BM-01',
           instansi: 'Dinas Pendidikan DKI Jakarta',
           kategori: 'Approval Diskon Khusus',
           detail: 'Mohon izin diskon tambahan 7% untuk paket SMA asesmen nasional agar kompetitif di negosiasi e-Purchasing.',
@@ -892,7 +925,7 @@
           klpd: 'Kab. Klaten',
           satker: 'Dinas Pendidikan Kab. Klaten',
           sirupId: 'RUP-54829101',
-          salesId: 'SLS-01',
+          salesId: 'SP-01',
           ringkasanProposal: 'Penawaran paket pengadaan buku & perangkat kurikulum merdeka TKDN tinggi, skema pembayaran termin APBD/DAK, plus layanan pelatihan guru.',
           targetVisit: '2026-11-27',
           status: 'Siap Visit',
@@ -905,7 +938,7 @@
           klpd: 'Prov. Jawa Tengah',
           satker: 'Dinas Pendidikan dan Kebudayaan Prov. Jateng',
           sirupId: 'RUP-54831244',
-          salesId: 'SLS-03',
+          salesId: 'MP-01',
           ringkasanProposal: 'Proposal teknis spesifikasi Chromebook & perangkat lab bersertifikat TKDN, garansi resmi 3 tahun, dan simulasi e-Purchasing.',
           targetVisit: '2026-11-25',
           status: 'Sudah Visit',
@@ -947,24 +980,28 @@
           status: String(p.status || 'Peluang Baru').trim(),
           notes: String(p.notes || '').trim()
         }));
-        parsed.sales = parsed.sales.map(s => ({
-          id: String(s.id || '').trim() || ('SLS-' + Math.floor(10 + Math.random() * 89)),
-          nama: String(s.nama || '').trim(),
-          area: String(s.area || '-').trim(),
-          wa: normalizePhone(s.wa),
-          waStatus: String(s.waStatus || 'Belum Di-WA').trim(),
-          lastWaSent: String(s.lastWaSent || '-').trim(),
-          history: Array.isArray(s.history) ? s.history.map((h, idx) => ({
-            id: String(h.id || `LAP-${100 + idx}`).trim(),
-            tanggal: normalizeExcelDate(h.tanggal, getTodayISO()),
-            sumberJenis: String(h.sumberJenis || (h.refId && String(h.refId).startsWith('PRG') ? 'Program Pusat' : h.refId && String(h.refId).startsWith('REQ') ? 'Request Sales' : 'Kunjungan Umum')).trim(),
-            refId: String(h.refId || '-').trim(),
-            judulProgram: String(h.judulProgram || h.instansi || '-').trim(),
-            instansi: String(h.instansi || '-').trim(),
-            hasil: String(h.hasil || 'Menunggu Anggaran').trim(),
-            ringkasan: String(h.ringkasan || '-').trim()
-          })) : []
-        }));
+        parsed.sales = parsed.sales.map(s => {
+          const cleanId = String(s.id || '').trim() || ('SP-' + String(Math.floor(1 + Math.random() * 98)).padStart(2, '0'));
+          return {
+            id: cleanId,
+            jabatan: getRoleLabelFromId(cleanId, String(s.jabatan || '').trim()),
+            nama: String(s.nama || '').trim(),
+            area: String(s.area || '-').trim(),
+            wa: normalizePhone(s.wa),
+            waStatus: String(s.waStatus || 'Belum Di-WA').trim(),
+            lastWaSent: String(s.lastWaSent || '-').trim(),
+            history: Array.isArray(s.history) ? s.history.map((h, idx) => ({
+              id: String(h.id || `LAP-${100 + idx}`).trim(),
+              tanggal: normalizeExcelDate(h.tanggal, getTodayISO()),
+              sumberJenis: String(h.sumberJenis || (h.refId && String(h.refId).startsWith('PRG') ? 'Program Pusat' : h.refId && String(h.refId).startsWith('REQ') ? 'Request Sales' : 'Kunjungan Umum')).trim(),
+              refId: String(h.refId || '-').trim(),
+              judulProgram: String(h.judulProgram || h.instansi || '-').trim(),
+              instansi: String(h.instansi || '-').trim(),
+              hasil: String(h.hasil || 'Menunggu Anggaran').trim(),
+              ringkasan: String(h.ringkasan || '-').trim()
+            })) : []
+          };
+        });
         parsed.requests = parsed.requests.map(r => ({
           id: String(r.id || '').trim() || ('REQ-' + Math.floor(100 + Math.random() * 900)),
           salesId: String(r.salesId || '').trim(),
@@ -1100,7 +1137,7 @@
         sirup: ['Peluang Seluruh Pengadaan (SIRUP.INAPROC.ID)', 'Analisa paket RUP instansi pemerintah (Barang, Konstruksi, Konsultansi, Jasa Lainnya) & skor AI.'],
         requests: ['Log Request Tim Sales', 'Kelola permintaan sampel, RAB, surat dukungan, dan persetujuan harga dari sales lapangan.'],
         program: ['Program Pusat (Proposal & Visit KLPD)', 'Buat proposal dari pusat agar sales visit ke relasi KLPD, dan pantau reporting hasil kunjungan via WA.'],
-        followup: ['Follow-Up WA Mingguan Sales', 'Kelola database sales, pilih topik draf WA (jadwal kunjungan atau follow-up hasil visit), dan catat laporan.'],
+        followup: ['Follow-Up WA Mingguan Sales', 'Kelola database sales (SP/SR/MP/BM/RKN), pilih topik draf WA, dan catat laporan kunjungan.'],
         reports: ['Laporan Hasil Kunjungan & Riwayat Database', 'Arsip terstruktur seluruh laporan kunjungan atas Program Pusat dan Request Sales, siap cetak maupun ekspor Excel.']
       };
       document.getElementById('pageTitle').textContent = titles[tab][0];
@@ -1310,7 +1347,7 @@
 
       const qMon = (document.getElementById('monSearchInput')?.value || '').trim().toLowerCase();
       const sortedSales = [...state.sales]
-        .filter(s => !qMon || s.nama.toLowerCase().includes(qMon) || s.area.toLowerCase().includes(qMon))
+        .filter(s => !qMon || [s.id, s.nama, s.area, getRoleLabelFromId(s.id, s.jabatan)].join(' ').toLowerCase().includes(qMon))
         .sort((a, b) => {
           const order = { 'Tinggi': 0, 'Sedang': 1, 'Rendah': 2 };
           return order[getFollowUpPriority(a).level] - order[getFollowUpPriority(b).level];
@@ -1363,6 +1400,7 @@
         const activeReqs = state.requests.filter(r => r.salesId === s.id && r.status !== 'Selesai');
         const activeProgs = (state.programs || []).filter(p => p.salesId === s.id && p.status !== 'Follow-Up Selesai');
         const prio = getFollowUpPriority(s);
+        const roleLabel = getRoleLabelFromId(s.id, s.jabatan);
 
         const reqSummary = activeReqs.length
           ? activeReqs.slice(0, 2).map(r => `<div class="truncate" title="${escapeHtml(r.instansi)} (${escapeHtml(r.status)})">• <span class="font-medium text-slate-800">${escapeHtml(r.instansi)}</span> <span class="text-[10px] text-slate-500">(${escapeHtml(r.status)})</span></div>`).join('')
@@ -1378,7 +1416,11 @@
         tr.className = 'hover:bg-slate-50/80 transition-colors align-top';
         tr.innerHTML = `
           <td class="py-3 px-3 break-words">
-            <p class="font-bold text-slate-900 leading-snug">${escapeHtml(s.nama)}</p>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">${escapeHtml(s.id)}</span>
+              <span class="text-[10px] font-medium text-indigo-600">${escapeHtml(roleLabel)}</span>
+            </div>
+            <p class="font-bold text-slate-900 leading-snug mt-0.5">${escapeHtml(s.nama)}</p>
             <p class="text-[11px] text-slate-500 leading-snug mt-0.5 line-clamp-2" title="${escapeHtml(s.area)}">${escapeHtml(s.area)}</p>
           </td>
           <td class="py-3 px-3 space-y-1 min-w-0">
@@ -1550,7 +1592,7 @@
     function renderRequests() {
       const salesSelect = document.getElementById('reqFilterSales');
       const curSales = salesSelect.value;
-      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.nama)}</option>`).join('');
+      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
       salesSelect.value = curSales;
 
       const fSales = salesSelect.value;
@@ -1590,7 +1632,7 @@
           </div>
           <div class="border-t border-slate-100 pt-3 space-y-2.5">
             <div class="flex items-center justify-between text-[11px] text-slate-500">
-              <span>Sales: <strong class="text-slate-800">${escapeHtml(sales ? sales.nama : '-')}</strong></span>
+              <span>Sales: <strong class="text-slate-800">${escapeHtml(sales ? `[${sales.id}] ${sales.nama}` : '-')}</strong></span>
               <span>Batas: <strong class="${r.prioritas === 'Tinggi' ? 'text-rose-600' : 'text-slate-700'}">${escapeHtml(normalizeExcelDate(r.deadline, '-'))}</strong></span>
             </div>
             <div class="flex items-center gap-2">
@@ -1682,7 +1724,7 @@
       const qSales = (document.getElementById('waSearchSales')?.value || '').trim().toLowerCase();
       const filtered = state.sales.filter(s => {
         const matchStatus = !fStatus || s.waStatus === fStatus;
-        const matchQ = !qSales || s.nama.toLowerCase().includes(qSales) || s.area.toLowerCase().includes(qSales);
+        const matchQ = !qSales || [s.id, s.nama, s.area, getRoleLabelFromId(s.id, s.jabatan)].join(' ').toLowerCase().includes(qSales);
         return matchStatus && matchQ;
       });
       const badgeColors = {
@@ -1700,11 +1742,16 @@
         const activeReqCount = state.requests.filter(r => r.salesId === s.id && r.status !== 'Selesai').length;
         const activeProgCount = (state.programs || []).filter(p => p.salesId === s.id && p.status !== 'Follow-Up Selesai').length;
         const isSelected = s.id === selectedSalesId;
+        const roleLabel = getRoleLabelFromId(s.id, s.jabatan);
         const btn = document.createElement('button');
         btn.className = `w-full text-left p-3.5 transition-colors flex items-start justify-between gap-2 ${isSelected ? 'bg-indigo-50/90 border-l-4 border-indigo-600' : 'hover:bg-slate-50'}`;
         btn.innerHTML = `
-          <div>
-            <p class="text-xs font-bold text-slate-900">${escapeHtml(s.nama)}</p>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">${escapeHtml(s.id)}</span>
+              <span class="text-[10px] font-medium text-indigo-600">${escapeHtml(roleLabel)}</span>
+            </div>
+            <p class="text-xs font-bold text-slate-900 mt-0.5">${escapeHtml(s.nama)}</p>
             <p class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(s.area)}</p>
             <p class="text-[11px] text-slate-400 mt-1">${activeReqCount} request • ${activeProgCount} program pusat • WA: ${escapeHtml(s.lastWaSent)}</p>
           </div>
@@ -1720,7 +1767,9 @@
       const sel = state.sales.find(s => s.id === selectedSalesId) || state.sales[0];
       if (!sel) return;
 
+      document.getElementById('selSalesIdBadge').textContent = sel.id;
       document.getElementById('selSalesName').textContent = sel.nama;
+      document.getElementById('selSalesRoleBadge').textContent = getRoleLabelFromId(sel.id, sel.jabatan);
       const badge = document.getElementById('selSalesBadge');
       badge.textContent = sel.waStatus;
       badge.className = `text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${badgeColors[sel.waStatus] || 'bg-slate-100 text-slate-600'}`;
@@ -1781,7 +1830,7 @@
     function renderReports() {
       const salesSelect = document.getElementById('repFilterSales');
       const curSales = salesSelect.value;
-      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.nama)}</option>`).join('');
+      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
       salesSelect.value = curSales;
 
       const q = (document.getElementById('repSearch')?.value || '').trim().toLowerCase();
@@ -1791,7 +1840,7 @@
 
       const allReports = getAllVisitReports();
       const filtered = allReports.filter(r => {
-        const matchQ = !q || [r.id, r.salesNama, r.instansi, r.judulProgram, r.ringkasan, r.refId].join(' ').toLowerCase().includes(q);
+        const matchQ = !q || [r.id, r.salesId, r.salesNama, r.instansi, r.judulProgram, r.ringkasan, r.refId].join(' ').toLowerCase().includes(q);
         const matchS = !fSales || r.salesId === fSales;
         const matchSrc = !fSource || r.sumberJenis === fSource;
         const matchH = !fHasil || r.hasil === fHasil;
@@ -1861,7 +1910,7 @@
             <div class="md:col-span-4">
               <p class="text-xs font-bold text-slate-900">${escapeHtml(rep.instansi)}</p>
               <p class="text-[11px] text-indigo-600 font-medium mt-0.5">${escapeHtml(rep.judulProgram)}</p>
-              <p class="text-[11px] text-slate-500 mt-1">Sales: <strong class="text-slate-800">${escapeHtml(rep.salesNama)}</strong> (${escapeHtml(rep.salesArea)})</p>
+              <p class="text-[11px] text-slate-500 mt-1">Sales: <strong class="text-slate-800">[${escapeHtml(rep.salesId)}] ${escapeHtml(rep.salesNama)}</strong> (${escapeHtml(rep.salesArea)})</p>
             </div>
             <div class="md:col-span-8 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 leading-relaxed">
               <span class="font-semibold text-slate-900">Ringkasan Hasil Kunjungan &amp; Tindak Lanjut:</span> ${escapeHtml(rep.ringkasan)}
@@ -1873,7 +1922,7 @@
     }
 
     function openAddRequestModal(prefillPkg = null) {
-      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
+      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
       const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
         state.sirup.map(p => `<option value="${escapeHtml(p.id)}" ${prefillPkg && prefillPkg.id === p.id ? 'selected' : ''}>${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
 
@@ -2109,8 +2158,8 @@
       openModal(`Reporting Hasil Kunjungan Sales — ${sales.nama}`, `
         <form id="formLogVisit" class="space-y-3 text-xs">
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-            <p class="font-bold text-slate-900">${escapeHtml(sales.nama)}</p>
-            <p class="text-slate-600 mt-0.5">Area: ${escapeHtml(sales.area)} • WhatsApp: +${escapeHtml(sales.wa)}</p>
+            <p class="font-bold text-slate-900">[${escapeHtml(sales.id)}] ${escapeHtml(sales.nama)}</p>
+            <p class="text-slate-600 mt-0.5">${escapeHtml(getRoleLabelFromId(sales.id, sales.jabatan))} • Area: ${escapeHtml(sales.area)} • WA: +${escapeHtml(sales.wa)}</p>
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Tautkan Program Pusat / Request Sales (Opsional)</label>
@@ -2219,8 +2268,26 @@
     function openEditSalesModal() {
       const sales = state.sales.find(s => s.id === selectedSalesId);
       if (!sales) return;
+      const curPrefix = String(sales.id || '').split('-')[0].toUpperCase();
+      const roleOptions = Object.entries(SALES_ROLE_MAP)
+        .map(([code, label]) => `<option value="${code}" ${curPrefix === code ? 'selected' : ''}>${code}-... (${label})</option>`)
+        .join('');
+
       openModal(`Edit Database Sales — ${sales.nama}`, `
         <form id="formEditSales" class="space-y-3 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Kategori / Jabatan</label>
+              <select id="editSalesRolePrefix" name="rolePrefix" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${roleOptions}</select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">ID Sales (Auto / Manual)</label>
+              <div class="flex gap-1.5">
+                <input id="editSalesIdInput" name="salesId" required value="${escapeHtml(sales.id)}" class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono font-semibold uppercase" />
+                <button type="button" id="btnEditGenId" class="px-2.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold whitespace-nowrap" title="Generate ID baru sesuai kategori">Auto</button>
+              </div>
+            </div>
+          </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Nama Sales</label>
             <input name="nama" required value="${escapeHtml(sales.nama)}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
@@ -2254,6 +2321,14 @@
         </form>
       `);
       document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+      const editRoleSel = document.getElementById('editSalesRolePrefix');
+      const editIdInput = document.getElementById('editSalesIdInput');
+      editRoleSel.addEventListener('change', () => {
+        editIdInput.value = generateNextSalesId(editRoleSel.value);
+      });
+      document.getElementById('btnEditGenId').addEventListener('click', () => {
+        editIdInput.value = generateNextSalesId(editRoleSel.value);
+      });
       document.getElementById('deleteSalesBtn').addEventListener('click', () => {
         if (state.sales.length <= 1) {
           showToast('Minimal harus ada 1 sales di database.', 'error');
@@ -2269,20 +2344,52 @@
       document.getElementById('formEditSales').addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
+        const oldId = sales.id;
+        const newId = fd.get('salesId').trim().toUpperCase();
+        const rolePrefix = fd.get('rolePrefix');
+        if (newId !== oldId && state.sales.some(s => s.id.toUpperCase() === newId)) {
+          showToast(`ID ${newId} sudah digunakan sales lain. Silakan klik Auto.`, 'error');
+          return;
+        }
+        sales.id = newId;
+        sales.jabatan = SALES_ROLE_MAP[rolePrefix] || getRoleLabelFromId(newId);
         sales.nama = fd.get('nama').trim();
         sales.area = fd.get('area').trim();
         sales.wa = normalizePhone(fd.get('wa'));
         sales.waStatus = fd.get('waStatus');
+        if (oldId !== newId) {
+          state.requests.forEach(r => { if (r.salesId === oldId) r.salesId = newId; });
+          (state.programs || []).forEach(p => { if (p.salesId === oldId) p.salesId = newId; });
+          selectedSalesId = newId;
+        }
         saveState();
         closeModal();
         renderAll();
-        showToast(`Data ${sales.nama} berhasil diperbarui.`, 'success');
+        showToast(`Data [${sales.id}] ${sales.nama} berhasil diperbarui.`, 'success');
       });
     }
 
     function openAddSalesModal() {
+      const defaultId = generateNextSalesId('SP');
+      const roleOptions = Object.entries(SALES_ROLE_MAP)
+        .map(([code, label]) => `<option value="${code}">${code}-... (${label})</option>`)
+        .join('');
+
       openModal('Tambah Anggota Tim Sales', `
         <form id="formAddSales" class="space-y-3 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Kategori Kode / Peran</label>
+              <select id="addSalesRolePrefix" name="rolePrefix" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${roleOptions}</select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">ID-Sales (Auto Generate)</label>
+              <div class="flex gap-1.5">
+                <input id="addSalesIdInput" name="salesId" required value="${defaultId}" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 font-mono font-bold text-indigo-700 uppercase" />
+                <button type="button" id="btnRegenSalesId" class="px-2.5 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold whitespace-nowrap" title="Generate nomor urut berikutnya">Auto</button>
+              </div>
+            </div>
+          </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Nama Sales</label>
             <input name="nama" required placeholder="Contoh: Hendra Kusuma" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
@@ -2302,11 +2409,26 @@
         </form>
       `);
       document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+      const roleSel = document.getElementById('addSalesRolePrefix');
+      const idInput = document.getElementById('addSalesIdInput');
+      roleSel.addEventListener('change', () => {
+        idInput.value = generateNextSalesId(roleSel.value);
+      });
+      document.getElementById('btnRegenSalesId').addEventListener('click', () => {
+        idInput.value = generateNextSalesId(roleSel.value);
+      });
       document.getElementById('formAddSales').addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
+        const rolePrefix = fd.get('rolePrefix');
+        const chosenId = fd.get('salesId').trim().toUpperCase() || generateNextSalesId(rolePrefix);
+        if (state.sales.some(s => s.id.toUpperCase() === chosenId)) {
+          showToast(`ID ${chosenId} sudah terdaftar. Klik Auto untuk nomor baru.`, 'error');
+          return;
+        }
         const newSales = {
-          id: 'SLS-' + Math.floor(10 + Math.random() * 89),
+          id: chosenId,
+          jabatan: SALES_ROLE_MAP[rolePrefix] || getRoleLabelFromId(chosenId),
           nama: fd.get('nama').trim(),
           area: fd.get('area').trim(),
           wa: normalizePhone(fd.get('wa')),
@@ -2319,7 +2441,7 @@
         saveState();
         closeModal();
         renderAll();
-        showToast(`${newSales.nama} ditambahkan ke tim sales.`, 'success');
+        showToast(`[${newSales.id}] ${newSales.nama} (${newSales.jabatan}) ditambahkan ke tim sales.`, 'success');
       });
     }
 
@@ -2343,10 +2465,12 @@
     }
 
     function exportWeeklyCsv() {
-      const rows = [['Nama Sales', 'Area', 'Status WA', 'WA Terakhir', 'Riwayat Kunjungan Terakhir', 'Hasil']];
+      const rows = [['ID Sales', 'Kategori / Jabatan', 'Nama Sales', 'Area', 'Status WA', 'WA Terakhir', 'Riwayat Kunjungan Terakhir', 'Hasil']];
       state.sales.forEach(s => {
         const last = s.history[s.history.length - 1];
         rows.push([
+          s.id,
+          getRoleLabelFromId(s.id, s.jabatan),
           s.nama,
           s.area,
           s.waStatus,
@@ -2375,6 +2499,7 @@
       const rows = getAllVisitReports().map(r => ({
         ID_Laporan: r.id,
         Tanggal_Visit: r.tanggal,
+        ID_Sales: r.salesId,
         Nama_Sales: r.salesNama,
         Wilayah_Area: r.salesArea,
         Sumber_Tugas: r.sumberJenis,
@@ -2410,6 +2535,7 @@
       }));
       const salesRows = state.sales.map(s => ({
         ID_Sales: s.id,
+        Kategori_Jabatan: getRoleLabelFromId(s.id, s.jabatan),
         Nama_Sales: s.nama,
         Wilayah_Area: s.area,
         No_WhatsApp: s.wa,
@@ -2494,16 +2620,42 @@
 
       const salesRows = [
         {
-          ID_Sales: 'SLS-01',
+          ID_Sales: 'SP-01',
+          Kategori_Jabatan: 'Sales Project',
           Nama_Sales: 'Budi Santoso',
           Wilayah_Area: 'Jawa Tengah (Solo Raya & Klaten)',
           No_WhatsApp: '6281234567890',
           Status_WA: 'Belum Di-WA'
         },
         {
-          ID_Sales: 'SLS-05',
-          Nama_Sales: 'Siti Aminah',
-          Wilayah_Area: 'Jawa Timur (Surabaya & Sidoarjo)',
+          ID_Sales: 'SR-01',
+          Kategori_Jabatan: 'Sales Reguler',
+          Nama_Sales: 'Rina Wijaya',
+          Wilayah_Area: 'DI Yogyakarta (Sleman & Bantul)',
+          No_WhatsApp: '6281398765432',
+          Status_WA: 'Belum Di-WA'
+        },
+        {
+          ID_Sales: 'MP-01',
+          Kategori_Jabatan: 'Manager Project',
+          Nama_Sales: 'Andi Pratama',
+          Wilayah_Area: 'Semarang & Pantura',
+          No_WhatsApp: '6281511223344',
+          Status_WA: 'Belum Di-WA'
+        },
+        {
+          ID_Sales: 'BM-01',
+          Kategori_Jabatan: 'Branch Manager',
+          Nama_Sales: 'Dedi Kurniawan',
+          Wilayah_Area: 'Jabodetabek',
+          No_WhatsApp: '6281788990011',
+          Status_WA: 'Belum Di-WA'
+        },
+        {
+          ID_Sales: 'RKN-01',
+          Kategori_Jabatan: 'Rekanan',
+          Nama_Sales: 'CV Mitra Nusantara',
+          Wilayah_Area: 'Jawa Timur (Surabaya)',
           No_WhatsApp: '6281999888777',
           Status_WA: 'Belum Di-WA'
         }
@@ -2512,7 +2664,7 @@
       const requestRows = [
         {
           ID_Request: 'REQ-105',
-          ID_Sales: 'SLS-01',
+          ID_Sales: 'SP-01',
           Nama_Sales: 'Budi Santoso',
           Instansi_Tujuan: 'Dinas Pendidikan Kab. Magelang',
           Kategori_Request: 'Sampel Buku & Daftar Harga',
@@ -2531,7 +2683,7 @@
           KLPD: 'Kab. Boyolali',
           Satker: 'Dinas Pendidikan dan Kebudayaan Kab. Boyolali',
           Kode_RUP: 'RUP-55011223',
-          ID_Sales: 'SLS-01',
+          ID_Sales: 'SP-01',
           Nama_Sales: 'Budi Santoso',
           Ringkasan_Proposal: 'Penawaran paket e-Katalog V6 dengan dukungan pelatihan guru & garansi resmi.',
           Target_Visit: '2026-11-30',
@@ -2544,7 +2696,7 @@
         {
           ID_Laporan: 'LAP-101',
           Tanggal_Visit: '2026-11-24',
-          ID_Sales: 'SLS-01',
+          ID_Sales: 'SP-01',
           Nama_Sales: 'Budi Santoso',
           Sumber_Tugas: 'Program Pusat',
           Kode_Referensi: 'PRG-203',
@@ -2561,7 +2713,7 @@
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(programRows), 'Program_Pusat');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(historyRows), 'Riwayat_Kunjungan');
       XLSX.writeFile(wb, 'Template_Database_NSM_AI.xlsx');
-      showToast('Template Excel (5 Sheet) berhasil diunduh.', 'success');
+      showToast('Template Excel (5 Sheet dengan kode SP/SR/MP/BM/RKN) berhasil diunduh.', 'success');
     }
 
     function openExcelHubModal() {
@@ -2570,7 +2722,7 @@
           <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p class="font-bold text-indigo-900">1. Unduh Template Excel Resmi</p>
-              <p class="text-indigo-700 mt-0.5">Berisi 5 sheet siap isi: <strong>SIRUP</strong>, <strong>Sales</strong>, <strong>Request</strong>, <strong>Program_Pusat</strong>, dan <strong>Riwayat_Kunjungan</strong>.</p>
+              <p class="text-indigo-700 mt-0.5">Berisi 5 sheet siap isi: <strong>SIRUP</strong>, <strong>Sales</strong> (SP/SR/MP/BM/RKN), <strong>Request</strong>, <strong>Program_Pusat</strong>, dan <strong>Riwayat_Kunjungan</strong>.</p>
             </div>
             <button type="button" id="btnDownloadTemplateXlsx" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -2636,8 +2788,10 @@
             const wb = XLSX.read(data, { type: 'array', cellDates: true });
             let counts = { sirup: 0, sales: 0, request: 0, program: 0, history: 0 };
             const resolveSalesId = (rawId, rawName) => {
-              const idStr = String(rawId || '').trim();
-              if (idStr && state.sales.some(s => s.id === idStr)) return idStr;
+              const idStr = String(rawId || '').trim().toUpperCase();
+              if (idStr && state.sales.some(s => s.id.toUpperCase() === idStr)) {
+                return state.sales.find(s => s.id.toUpperCase() === idStr).id;
+              }
               const nameStr = String(rawName || '').trim().toLowerCase();
               if (nameStr) {
                 const found = state.sales.find(s => s.nama.trim().toLowerCase() === nameStr);
@@ -2670,20 +2824,36 @@
             };
 
             const processSales = (rows) => {
-              const mapped = rows.map(r => ({
-                id: String(r.ID_Sales || r.id || ('SLS-' + Math.floor(10 + Math.random() * 89))).trim(),
-                nama: String(r.Nama_Sales || r.nama || '').trim(),
-                area: String(r.Wilayah_Area || r.area || '-').trim(),
-                wa: normalizePhone(r.No_WhatsApp || r.wa),
-                waStatus: String(r.Status_WA || r.waStatus || 'Belum Di-WA').trim(),
-                lastWaSent: '-',
-                history: []
-              })).filter(x => x.nama);
+              const mapped = rows.map(r => {
+                const rawId = String(r.ID_Sales || r.id || '').trim().toUpperCase();
+                const cleanId = rawId || generateNextSalesId('SP');
+                return {
+                  id: cleanId,
+                  jabatan: getRoleLabelFromId(cleanId, String(r.Kategori_Jabatan || r.jabatan || '').trim()),
+                  nama: String(r.Nama_Sales || r.nama || '').trim(),
+                  area: String(r.Wilayah_Area || r.area || '-').trim(),
+                  wa: normalizePhone(r.No_WhatsApp || r.wa),
+                  waStatus: String(r.Status_WA || r.waStatus || 'Belum Di-WA').trim(),
+                  lastWaSent: '-',
+                  history: []
+                };
+              }).filter(x => x.nama);
               if (mode === 'replace' && mapped.length) state.sales = mapped;
               else mapped.forEach(item => {
-                const idx = state.sales.findIndex(x => x.id === item.id || x.nama.toLowerCase() === item.nama.toLowerCase());
-                if (idx >= 0) state.sales[idx] = { ...state.sales[idx], nama: item.nama, area: item.area, wa: item.wa || state.sales[idx].wa, waStatus: item.waStatus };
-                else state.sales.push(item);
+                const idx = state.sales.findIndex(x => x.id.toUpperCase() === item.id.toUpperCase() || x.nama.toLowerCase() === item.nama.toLowerCase());
+                if (idx >= 0) {
+                  state.sales[idx] = {
+                    ...state.sales[idx],
+                    id: item.id,
+                    jabatan: item.jabatan,
+                    nama: item.nama,
+                    area: item.area,
+                    wa: item.wa || state.sales[idx].wa,
+                    waStatus: item.waStatus
+                  };
+                } else {
+                  state.sales.push(item);
+                }
               });
               counts.sales += mapped.length;
             };
@@ -2811,7 +2981,7 @@
     function renderPrograms() {
       const salesSelect = document.getElementById('progFilterSales');
       const curSales = salesSelect.value;
-      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.nama)}</option>`).join('');
+      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
       salesSelect.value = curSales;
 
       const fSales = salesSelect.value;
@@ -2869,7 +3039,7 @@
           </div>
           <div class="border-t border-slate-100 pt-3 space-y-2.5">
             <div class="flex items-center justify-between text-[11px] text-slate-500">
-              <span>Sales Visit: <strong class="text-slate-800">${escapeHtml(sales ? sales.nama : '-')}</strong></span>
+              <span>Sales Visit: <strong class="text-slate-800">${escapeHtml(sales ? `[${sales.id}] ${sales.nama}` : '-')}</strong></span>
               <span>Target Visit: <strong class="text-slate-800">${escapeHtml(p.targetVisit)}</strong></span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
@@ -2915,7 +3085,7 @@
     }
 
     function openAddProgramModal() {
-      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
+      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
       const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
         state.sirup.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
 
@@ -2991,7 +3161,7 @@
         <form id="formReportProg" class="space-y-3 text-xs">
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
             <p class="font-bold text-slate-900">${escapeHtml(prog.judul)}</p>
-            <p class="text-slate-600 mt-0.5">${escapeHtml(prog.klpd)} — ${escapeHtml(prog.satker)} (Sales: ${escapeHtml(sales ? sales.nama : '-')})</p>
+            <p class="text-slate-600 mt-0.5">${escapeHtml(prog.klpd)} — ${escapeHtml(prog.satker)} (Sales: ${escapeHtml(sales ? `[${sales.id}] ${sales.nama}` : '-')})</p>
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Tanggal Kunjungan Sales</label>
