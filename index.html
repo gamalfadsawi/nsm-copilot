@@ -231,6 +231,37 @@
             <div id="aiBriefList" class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3"></div>
           </div>
 
+          <!-- Task Prioritas Harian Wajib Dikerjakan -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-rose-50/70 via-amber-50/50 to-white">
+              <div class="flex items-start gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+                  <i data-lucide="list-checks" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-sm font-bold text-slate-900">Task Prioritas Harian — Wajib Dikerjakan Dahulu</h3>
+                    <span id="dailyTaskDateBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">-</span>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-0.5">Urutan eksekusi wajib hari ini dari <strong>High Request Sales</strong>, <strong>High Analisa SIRUP</strong>, dan <strong>High Program Pusat</strong>.</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <select id="dailyTaskSourceFilter" class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white font-medium text-slate-700">
+                  <option value="">Semua Kategori High (3 Sumber)</option>
+                  <option value="High Request Sales">High Request Sales</option>
+                  <option value="High Analisa SIRUP">High Analisa SIRUP</option>
+                  <option value="High Program Pusat">High Program Pusat</option>
+                </select>
+                <span id="dailyTaskProgressBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-900 text-white tabular-nums">0 / 0 Selesai</span>
+              </div>
+            </div>
+            <div id="dailyPriorityTasksList" class="divide-y divide-slate-100 max-h-[420px] overflow-y-auto"></div>
+            <div id="dailyPriorityTasksEmpty" class="hidden p-6 text-center text-xs text-slate-500">
+              Seluruh task prioritas tinggi hari ini sudah selesai dikerjakan!
+            </div>
+          </div>
+
           <!-- Monitoring Table: Request Sales & Program Pusat Seluruh Sales -->
           <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
@@ -1022,11 +1053,11 @@
           sirupId: String(p.sirupId || '').trim(),
           salesId: String(p.salesId || '').trim(),
           ringkasanProposal: String(p.ringkasanProposal || '').trim(),
-          targetVisit: normalizeExcelDate(p.targetVisit, getTodayISO()),
-          status: String(p.status || 'Siap Visit').trim(),
-          waReportStatus: String(p.waReportStatus || 'Belum Di-WA').trim(),
-          hasilKunjungan: String(p.hasilKunjungan || '').trim()
+          hasilKunjungan: normalizeExcelDate(p.hasilKunjungan, '') ? String(p.hasilKunjungan || '').trim() : String(p.hasilKunjungan || '').trim()
         }));
+        if (!Array.isArray(parsed.completedDailyTasks)) {
+          parsed.completedDailyTasks = [];
+        }
         return parsed;
       }
       return null;
@@ -1295,8 +1326,173 @@
         briefEl.appendChild(card);
       });
 
+      renderDailyPriorityTasks();
       renderDashboardMonitoring();
       renderCharts();
+    }
+
+    function buildDailyPriorityTasks() {
+      const today = getTodayISO();
+      const tasks = [];
+
+      // 1. High Request Sales (Prioritas Tinggi & belum Selesai)
+      state.requests
+        .filter(r => r.status !== 'Selesai' && r.prioritas === 'Tinggi')
+        .forEach(r => {
+          const sls = state.sales.find(s => s.id === r.salesId);
+          const isOverdue = r.deadline && r.deadline <= today;
+          tasks.push({
+            key: `REQ:${r.id}`,
+            rank: 1,
+            urgencyScore: isOverdue ? 100 : 94,
+            source: 'High Request Sales',
+            sourceBadge: 'bg-amber-50 text-amber-800 border-amber-200',
+            code: r.id,
+            title: `${r.kategori} — ${r.instansi}`,
+            subtitle: `Sales: ${sls ? `[${sls.id}] ${sls.nama}` : '-'} • Deadline: ${r.deadline} • Status: ${r.status}`,
+            detail: r.detail,
+            actionLabel: r.status === 'Baru' ? 'Proses Request' : 'Follow-Up WA',
+            onAction: () => {
+              if (r.status === 'Baru') {
+                r.status = 'Diproses NSM';
+                saveState();
+                renderAll();
+                showToast(`Request ${r.id} ditandai Diproses NSM.`, 'success');
+              } else {
+                if (r.salesId) selectedSalesId = r.salesId;
+                switchTab('followup');
+              }
+            }
+          });
+        });
+
+      // 2. High Analisa SIRUP (Skor AI >= 80 & belum selesai)
+      state.sirup
+        .filter(p => calcAiScore(p) >= 80 && p.status !== 'Selesai')
+        .forEach(p => {
+          const score = calcAiScore(p);
+          tasks.push({
+            key: `RUP:${p.id}`,
+            rank: 2,
+            urgencyScore: score,
+            source: 'High Analisa SIRUP',
+            sourceBadge: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+            code: p.id,
+            title: `${p.namaPaket} (${formatRupiah(p.pagu)})`,
+            subtitle: `${p.klpd} — ${p.satker} • Metode: ${p.metode} • Skor AI: ${score}/100`,
+            detail: p.notes || 'Peluang tinggi SIRUP, segera buat penugasan request/proposal ke sales area.',
+            actionLabel: 'Tugaskan Sales',
+            onAction: () => openAddRequestModal(p)
+          });
+        });
+
+      // 3. High Program Pusat (Status Draft Pusat / Siap Visit / Belum Lapor Hasil)
+      (state.programs || [])
+        .filter(p => p.status !== 'Follow-Up Selesai')
+        .forEach(p => {
+          const sls = state.sales.find(s => s.id === p.salesId);
+          const isUrgentVisit = p.status === 'Draft Pusat' || p.status === 'Siap Visit' || p.waReportStatus === 'Belum Di-WA';
+          if (!isUrgentVisit) return;
+          tasks.push({
+            key: `PRG:${p.id}`,
+            rank: 3,
+            urgencyScore: p.targetVisit && p.targetVisit <= today ? 96 : 88,
+            source: 'High Program Pusat',
+            sourceBadge: 'bg-sky-50 text-sky-800 border-sky-200',
+            code: p.id,
+            title: `${p.judul} — ${p.klpd}`,
+            subtitle: `Sales Visit: ${sls ? `[${sls.id}] ${sls.nama}` : '-'} • Target Visit: ${p.targetVisit} • Status: ${p.status}`,
+            detail: p.ringkasanProposal,
+            actionLabel: 'Kawal Visit',
+            onAction: () => {
+              if (p.salesId) selectedSalesId = p.salesId;
+              switchTab('program');
+            }
+          });
+        });
+
+      return tasks.sort((a, b) => b.urgencyScore - a.urgencyScore || a.rank - b.rank);
+    }
+
+    function renderDailyPriorityTasks() {
+      const listEl = document.getElementById('dailyPriorityTasksList');
+      const emptyEl = document.getElementById('dailyPriorityTasksEmpty');
+      if (!listEl || !emptyEl) return;
+
+      const today = getTodayISO();
+      const dateBadge = document.getElementById('dailyTaskDateBadge');
+      if (dateBadge) {
+        const formatted = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+        dateBadge.textContent = formatted;
+      }
+
+      if (!Array.isArray(state.completedDailyTasks)) state.completedDailyTasks = [];
+      const doneSet = new Set(
+        state.completedDailyTasks
+          .filter(x => x.startsWith(today + ':'))
+          .map(x => x.slice(today.length + 1))
+      );
+
+      const sourceFilter = document.getElementById('dailyTaskSourceFilter')?.value || '';
+      const allTasks = buildDailyPriorityTasks();
+      const filteredTasks = allTasks.filter(t => !sourceFilter || t.source === sourceFilter);
+
+      const doneCount = allTasks.filter(t => doneSet.has(t.key)).length;
+      const progBadge = document.getElementById('dailyTaskProgressBadge');
+      if (progBadge) progBadge.textContent = `${doneCount} / ${allTasks.length} Selesai`;
+
+      listEl.innerHTML = '';
+      if (filteredTasks.length === 0) {
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+      emptyEl.classList.add('hidden');
+
+      // Sort unchecked tasks first, completed tasks at bottom
+      const ordered = [...filteredTasks].sort((a, b) => Number(doneSet.has(a.key)) - Number(doneSet.has(b.key)));
+
+      ordered.forEach((task, idx) => {
+        const isDone = doneSet.has(task.key);
+        const row = document.createElement('div');
+        row.className = `p-3.5 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${isDone ? 'bg-slate-50/80 opacity-65' : 'hover:bg-slate-50/70'}`;
+        row.innerHTML = `
+          <div class="flex items-start gap-3 min-w-0 flex-1">
+            <input type="checkbox" ${isDone ? 'checked' : ''} aria-label="Tandai selesai" class="mt-1 w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer flex-shrink-0" />
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-600 text-white">#${idx + 1} WAJIB</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${task.sourceBadge}">${escapeHtml(task.source)}</span>
+                <span class="font-mono text-[11px] font-semibold text-slate-500">${escapeHtml(task.code)}</span>
+              </div>
+              <p class="text-xs font-bold text-slate-900 mt-1 ${isDone ? 'line-through text-slate-500' : ''}">${escapeHtml(task.title)}</p>
+              <p class="text-[11px] text-slate-600 mt-0.5">${escapeHtml(task.subtitle)}</p>
+              <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-1">${escapeHtml(task.detail)}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+            <button data-task-go class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-indigo-600 text-white text-[11px] font-semibold inline-flex items-center gap-1 transition-colors">
+              <span>${escapeHtml(task.actionLabel)}</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+
+        row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+          const token = `${today}:${task.key}`;
+          if (e.target.checked) {
+            if (!state.completedDailyTasks.includes(token)) state.completedDailyTasks.push(token);
+            showToast(`Task ${task.code} ditandai selesai untuk hari ini.`, 'success');
+          } else {
+            state.completedDailyTasks = state.completedDailyTasks.filter(x => x !== token);
+          }
+          saveState();
+          renderDailyPriorityTasks();
+          if (window.lucide) lucide.createIcons();
+        });
+
+        row.querySelector('[data-task-go]').addEventListener('click', task.onAction);
+        listEl.appendChild(row);
+      });
     }
 
     function getFollowUpPriority(sales) {
@@ -3257,6 +3453,11 @@
     document.getElementById('btnRefreshBrief').addEventListener('click', () => {
       renderDashboard();
       showToast('Analisis AI NSM diperbarui.', 'info');
+    });
+
+    document.getElementById('dailyTaskSourceFilter')?.addEventListener('change', () => {
+      renderDailyPriorityTasks();
+      if (window.lucide) lucide.createIcons();
     });
 
     document.getElementById('monSearchInput')?.addEventListener('input', () => {
