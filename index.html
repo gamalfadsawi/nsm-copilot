@@ -17,6 +17,11 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     ::-webkit-scrollbar-track { background: transparent; }
+    @media print {
+      aside, header, .no-print { display: none !important; }
+      body, main { background: #ffffff !important; }
+      #view-reports { display: block !important; }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
@@ -62,6 +67,11 @@
             <i data-lucide="message-circle" class="w-4 h-4"></i>
             <span>Follow-Up WA Mingguan</span>
             <span id="badgePendingWA" class="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">0</span>
+          </button>
+          <button data-tab="reports" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium text-left transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>Laporan Kunjungan</span>
+            <span id="badgeTotalReports" class="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">0</span>
           </button>
         </nav>
       </div>
@@ -150,6 +160,54 @@
               </div>
               <p id="kpiHotVisits" class="text-xl font-bold text-slate-900 mt-2 tabular-nums">0</p>
               <p class="text-xs text-slate-500 mt-1">Siap eksekusi penawaran/katalog</p>
+            </div>
+          </div>
+
+          <!-- Statistik Proposal Pusat, Visiting & Prospek Panas per Sales -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-600">Proposal Pusat Dibuat</span>
+                  <span class="p-2 rounded-lg bg-sky-50 text-sky-600"><i data-lucide="file-plus-2" class="w-4 h-4"></i></span>
+                </div>
+                <p id="statPropTotal" class="text-2xl font-bold text-slate-900 mt-2 tabular-nums">0</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Total proposal disiapkan untuk visit KLPD</p>
+              </div>
+              <div class="mt-3 pt-3 border-t border-slate-100">
+                <p class="text-[11px] font-semibold text-slate-600 mb-1.5">Sales Penanggung Jawab:</p>
+                <div id="statPropSalesList" class="flex flex-wrap gap-1.5"></div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-600">Proposal Diserahkan (Visiting)</span>
+                  <span class="p-2 rounded-lg bg-indigo-50 text-indigo-600"><i data-lucide="handshake" class="w-4 h-4"></i></span>
+                </div>
+                <p id="statVisitTotal" class="text-2xl font-bold text-slate-900 mt-2 tabular-nums">0</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Status Sudah Visit / Follow-Up Selesai</p>
+              </div>
+              <div class="mt-3 pt-3 border-t border-slate-100">
+                <p class="text-[11px] font-semibold text-slate-600 mb-1.5">Sales yang Sudah Visit:</p>
+                <div id="statVisitSalesList" class="flex flex-wrap gap-1.5"></div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-slate-600">Hasil Prospek Panas</span>
+                  <span class="p-2 rounded-lg bg-rose-50 text-rose-600"><i data-lucide="flame" class="w-4 h-4"></i></span>
+                </div>
+                <p id="statHotTotal" class="text-2xl font-bold text-rose-600 mt-2 tabular-nums">0</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Hasil laporan visit berpotensi closing tinggi</p>
+              </div>
+              <div class="mt-3 pt-3 border-t border-slate-100">
+                <p class="text-[11px] font-semibold text-slate-600 mb-1.5">Sales Peraih Prospek Panas:</p>
+                <div id="statHotSalesList" class="flex flex-wrap gap-1.5"></div>
+              </div>
             </div>
           </div>
 
@@ -364,8 +422,8 @@
         <section id="view-followup" class="hidden space-y-4">
           <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 class="text-sm font-bold text-slate-900">Follow-Up Mingguan WA Sales (Hasil Kunjungan atas Request)</h3>
-              <p class="text-xs text-slate-500">Pilih sales, generate pesan WA otomatis berisi daftar request yang belum dilaporkan, kirim via WhatsApp, lalu catat hasil kunjungannya.</p>
+              <h3 class="text-sm font-bold text-slate-900">Follow-Up Mingguan WA Sales (Hasil Kunjungan atas Request &amp; Program Pusat)</h3>
+              <p class="text-xs text-slate-500">Pilih sales, pilih topik draf WA (prioritas jadwal kunjungan atau follow-up setelah visit), kirim via WhatsApp, lalu catat hasil kunjungannya.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button id="btnAddSales" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 transition-colors">
@@ -398,7 +456,7 @@
                   <input id="waSearchSales" type="text" placeholder="Cari nama sales atau area..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
               </div>
-              <div id="salesFollowUpList" class="divide-y divide-slate-100 max-h-[540px] overflow-y-auto"></div>
+              <div id="salesFollowUpList" class="divide-y divide-slate-100 max-h-[580px] overflow-y-auto"></div>
             </div>
 
             <!-- Right: AI WA Composer & Visit Log -->
@@ -416,7 +474,7 @@
                     </div>
                     <p id="selSalesMeta" class="text-xs text-slate-500 mt-0.5">-</p>
                   </div>
-                  <div class="flex items-center gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
                     <select id="waToneSelect" class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">
                       <option value="kolaboratif">Gaya: Ramah &amp; Kolaboratif</option>
                       <option value="tegas">Gaya: Tegas &amp; Target</option>
@@ -441,11 +499,18 @@
                   <div id="selSalesPrograms" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
                 </div>
 
-                <!-- Draft Message -->
-                <div>
-                  <label for="waMessageDraft" class="block text-xs font-semibold text-slate-700 mb-1.5">Draf Pesan WhatsApp Mingguan:</label>
+                <!-- Draft Message & Menu Pilihan Topik WA -->
+                <div class="space-y-2">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <label for="waDraftTopicSelect" class="text-xs font-semibold text-slate-700">Menu Pilihan Draf Pesan WhatsApp Mingguan:</label>
+                    <select id="waDraftTopicSelect" class="text-xs px-2.5 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50/70 text-indigo-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <option value="prioritas_jadwal">1. Prioritas Jadwal Kunjungan Program Pusat (Proposal/RAB)</option>
+                      <option value="followup_setelah_visit">2. Follow-Up Proposal/RAB Setelah Kunjungan</option>
+                      <option value="gabungan">3. Gabungan (Request Sales &amp; Program Pusat)</option>
+                    </select>
+                  </div>
                   <textarea id="waMessageDraft" rows="7" class="w-full p-3 text-xs leading-relaxed rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-                  <div class="flex flex-wrap items-center justify-between gap-2 mt-2.5">
+                  <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <div class="flex items-center gap-2">
                       <button id="btnCopyWA" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
                         <i data-lucide="copy" class="w-3.5 h-3.5"></i>
@@ -465,10 +530,77 @@
 
                 <!-- Recent Visit History for this Sales -->
                 <div class="border-t border-slate-100 pt-3">
-                  <p class="text-xs font-semibold text-slate-700 mb-2">Riwayat Laporan Kunjungan:</p>
+                  <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-semibold text-slate-700">Riwayat Laporan Kunjungan Sales Ini:</p>
+                    <button id="btnViewAllReports" class="text-[11px] font-semibold text-indigo-600 hover:underline">Lihat Semua Laporan &rarr;</button>
+                  </div>
                   <div id="selSalesHistory" class="space-y-2 max-h-44 overflow-y-auto"></div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: LAPORAN KUNJUNGAN & RIWAYAT DATABASE -->
+        <section id="view-reports" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Bentuk Laporan Hasil Kunjungan &amp; Riwayat Database</h3>
+                <p class="text-xs text-slate-500">Seluruh hasil kunjungan lapangan atas Program Pusat (Proposal/RAB) dan Request Sales tersimpan otomatis di database.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2 no-print">
+                <button id="btnPrintReport" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 transition-colors">
+                  <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                  <span>Cetak / PDF Laporan</span>
+                </button>
+                <button id="btnExportReportsXlsx" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
+                  <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                  <span>Ekspor Laporan (.xlsx)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 no-print">
+              <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+                <input id="repSearch" type="text" placeholder="Cari instansi, judul proposal, ringkasan..." class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <select id="repFilterSales" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                <option value="">Semua Sales</option>
+              </select>
+              <select id="repFilterSource" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                <option value="">Semua Sumber Tugas</option>
+                <option value="Program Pusat">Program Pusat (Proposal/RAB)</option>
+                <option value="Request Sales">Request Sales</option>
+                <option value="Kunjungan Umum">Kunjungan Umum</option>
+              </select>
+              <select id="repFilterHasil" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                <option value="">Semua Hasil Kunjungan</option>
+                <option value="Prospek Panas">Prospek Panas</option>
+                <option value="Menunggu Anggaran">Menunggu Anggaran</option>
+                <option value="Butuh Penawaran Ulang">Butuh Penawaran Ulang</option>
+                <option value="Batal / Kalah">Batal / Kalah</option>
+              </select>
+            </div>
+
+            <!-- Summary Strip -->
+            <div id="reportSummaryCards" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1"></div>
+          </div>
+
+          <!-- Formal Report Cards & History Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-3.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider">Rekapitulasi Resmi Laporan Hasil Kunjungan Lapangan (NSM)</h4>
+                <p id="reportPrintMeta" class="text-[11px] text-slate-300 mt-0.5">Tersinkronisasi dengan Database Program Pusat &amp; Request Sales</p>
+              </div>
+              <span id="reportCountLabel" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white/15">0 Laporan</span>
+            </div>
+            <div id="reportsListContainer" class="divide-y divide-slate-200"></div>
+            <div id="reportsEmpty" class="hidden p-8 text-center text-xs text-slate-500">
+              Belum ada riwayat laporan kunjungan yang sesuai filter.
             </div>
           </div>
         </section>
@@ -616,7 +748,16 @@
           waStatus: 'Belum Di-WA',
           lastWaSent: '-',
           history: [
-            { tanggal: '2026-11-16', instansi: 'Dinas Pendidikan Kab. Klaten', hasil: 'Menunggu Anggaran', ringkasan: 'PPK sudah terima katalog fisik, menunggu penetapan DPA.' }
+            {
+              id: 'LAP-001',
+              tanggal: '2026-11-16',
+              sumberJenis: 'Request Sales',
+              refId: 'REQ-101',
+              judulProgram: 'Sampel Buku & Daftar Harga',
+              instansi: 'Dinas Pendidikan Kab. Klaten',
+              hasil: 'Menunggu Anggaran',
+              ringkasan: 'PPK sudah terima katalog fisik, menunggu penetapan DPA.'
+            }
           ]
         },
         {
@@ -627,7 +768,16 @@
           waStatus: 'Menunggu Balasan',
           lastWaSent: '2026-11-23 07:45',
           history: [
-            { tanggal: '2026-11-17', instansi: 'Dinas Pendidikan Kab. Sleman', hasil: 'Prospek Panas', ringkasan: 'Kasi Kurikulum minta sampel 15 judul literasi numerasi.' }
+            {
+              id: 'LAP-002',
+              tanggal: '2026-11-17',
+              sumberJenis: 'Request Sales',
+              refId: 'REQ-102',
+              judulProgram: 'Penawaran Harga / RAB',
+              instansi: 'Dinas Pendidikan Kab. Sleman',
+              hasil: 'Prospek Panas',
+              ringkasan: 'Kasi Kurikulum minta sampel 15 judul literasi numerasi.'
+            }
           ]
         },
         {
@@ -638,7 +788,16 @@
           waStatus: 'Sudah Lapor',
           lastWaSent: '2026-11-23 08:05',
           history: [
-            { tanggal: '2026-11-23', instansi: 'Disarpus Prov. Jateng', hasil: 'Prospek Panas', ringkasan: 'Sudah visit ke bidang pengolahan bahan pustaka, siap klik e-Katalog bulan depan.' }
+            {
+              id: 'LAP-003',
+              tanggal: '2026-11-23',
+              sumberJenis: 'Program Pusat',
+              refId: 'PRG-202',
+              judulProgram: 'Proposal Modernisasi Peralatan TIK & Lab Sekolah',
+              instansi: 'Dinas Pendidikan dan Kebudayaan Prov. Jateng',
+              hasil: 'Prospek Panas',
+              ringkasan: 'Kabid Sarpras menyambut baik proposal pusat; meminta lampiran surat dukungan distributor sebelum tayang paket.'
+            }
           ]
         },
         {
@@ -649,7 +808,16 @@
           waStatus: 'Butuh Eskalasi',
           lastWaSent: '2026-11-21 15:20',
           history: [
-            { tanggal: '2026-11-21', instansi: 'Dinas Pendidikan DKI Jakarta', hasil: 'Butuh Penawaran Ulang', ringkasan: 'Kalah harga di 3 judul utama, butuh persetujuan diskon NSM untuk negosiasi e-Katalog.' }
+            {
+              id: 'LAP-004',
+              tanggal: '2026-11-21',
+              sumberJenis: 'Request Sales',
+              refId: 'REQ-104',
+              judulProgram: 'Approval Diskon Khusus',
+              instansi: 'Dinas Pendidikan DKI Jakarta',
+              hasil: 'Butuh Penawaran Ulang',
+              ringkasan: 'Kalah harga di 3 judul utama, butuh persetujuan diskon NSM untuk negosiasi e-Katalog.'
+            }
           ]
         }
       ],
@@ -772,7 +940,16 @@
           wa: normalizePhone(s.wa),
           waStatus: String(s.waStatus || 'Belum Di-WA').trim(),
           lastWaSent: String(s.lastWaSent || '-').trim(),
-          history: Array.isArray(s.history) ? s.history : []
+          history: Array.isArray(s.history) ? s.history.map((h, idx) => ({
+            id: String(h.id || `LAP-${100 + idx}`).trim(),
+            tanggal: normalizeExcelDate(h.tanggal, getTodayISO()),
+            sumberJenis: String(h.sumberJenis || (h.refId && String(h.refId).startsWith('PRG') ? 'Program Pusat' : h.refId && String(h.refId).startsWith('REQ') ? 'Request Sales' : 'Kunjungan Umum')).trim(),
+            refId: String(h.refId || '-').trim(),
+            judulProgram: String(h.judulProgram || h.instansi || '-').trim(),
+            instansi: String(h.instansi || '-').trim(),
+            hasil: String(h.hasil || 'Menunggu Anggaran').trim(),
+            ringkasan: String(h.ringkasan || '-').trim()
+          })) : []
         }));
         parsed.requests = parsed.requests.map(r => ({
           id: String(r.id || '').trim() || ('REQ-' + Math.floor(100 + Math.random() * 900)),
@@ -892,7 +1069,7 @@
 
     function switchTab(tab) {
       activeTab = tab;
-      ['dashboard', 'sirup', 'requests', 'program', 'followup'].forEach(t => {
+      ['dashboard', 'sirup', 'requests', 'program', 'followup', 'reports'].forEach(t => {
         document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
       });
       document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -903,11 +1080,12 @@
         btn.classList.toggle('hover:bg-slate-800', !isActive);
       });
       const titles = {
-        dashboard: ['Ringkasan AI NSM', 'Pantau seluruh peluang pengadaan SIRUP, permintaan tim sales, dan progres kunjungan mingguan.'],
+        dashboard: ['Ringkasan AI NSM', 'Pantau seluruh peluang pengadaan SIRUP, statistik proposal pusat, permintaan sales, dan progres kunjungan mingguan.'],
         sirup: ['Peluang Seluruh Pengadaan (SIRUP.INAPROC.ID)', 'Analisa paket RUP instansi pemerintah (Barang, Konstruksi, Konsultansi, Jasa Lainnya) & skor AI.'],
         requests: ['Log Request Tim Sales', 'Kelola permintaan sampel, RAB, surat dukungan, dan persetujuan harga dari sales lapangan.'],
         program: ['Program Pusat (Proposal & Visit KLPD)', 'Buat proposal dari pusat agar sales visit ke relasi KLPD, dan pantau reporting hasil kunjungan via WA.'],
-        followup: ['Follow-Up WA Mingguan Sales', 'Kelola database sales, kirim pengingat WA otomatis, dan catat hasil kunjungan atas setiap request.']
+        followup: ['Follow-Up WA Mingguan Sales', 'Kelola database sales, pilih topik draf WA (jadwal kunjungan atau follow-up hasil visit), dan catat laporan.'],
+        reports: ['Laporan Hasil Kunjungan & Riwayat Database', 'Arsip terstruktur seluruh laporan kunjungan atas Program Pusat dan Request Sales, siap cetak maupun ekspor Excel.']
       };
       document.getElementById('pageTitle').textContent = titles[tab][0];
       document.getElementById('pageSubtitle').textContent = titles[tab][1];
@@ -918,13 +1096,56 @@
       renderAll();
     }
 
+    function getAllVisitReports() {
+      const list = [];
+      state.sales.forEach(s => {
+        (s.history || []).forEach(h => {
+          list.push({
+            id: h.id || '-',
+            tanggal: h.tanggal || '-',
+            salesId: s.id,
+            salesNama: s.nama,
+            salesArea: s.area,
+            sumberJenis: h.sumberJenis || 'Kunjungan Umum',
+            refId: h.refId || '-',
+            judulProgram: h.judulProgram || h.instansi || '-',
+            instansi: h.instansi || '-',
+            hasil: h.hasil || '-',
+            ringkasan: h.ringkasan || '-'
+          });
+        });
+      });
+      return list.sort((a, b) => String(b.tanggal).localeCompare(String(a.tanggal)));
+    }
+
     function renderBadges() {
       const pendingReq = state.requests.filter(r => r.status !== 'Selesai').length;
       const pendingWA = state.sales.filter(s => s.waStatus !== 'Sudah Lapor').length;
       const pendingProg = (state.programs || []).filter(p => p.status !== 'Follow-Up Selesai').length;
+      const totalReports = getAllVisitReports().length;
       document.getElementById('badgePendingReq').textContent = pendingReq;
       document.getElementById('badgePendingProg').textContent = pendingProg;
       document.getElementById('badgePendingWA').textContent = pendingWA;
+      document.getElementById('badgeTotalReports').textContent = totalReports;
+    }
+
+    function renderSalesChipGroup(containerId, items, salesResolver, badgeClass) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const countsBySales = {};
+      items.forEach(item => {
+        const s = salesResolver(item);
+        const name = s ? s.nama : 'Belum Di-assign';
+        countsBySales[name] = (countsBySales[name] || 0) + 1;
+      });
+      const entries = Object.entries(countsBySales);
+      if (entries.length === 0) {
+        container.innerHTML = '<span class="text-[11px] text-slate-400 italic">Belum ada data</span>';
+        return;
+      }
+      container.innerHTML = entries.map(([name, count]) =>
+        `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${badgeClass}">${escapeHtml(name)} <span class="opacity-75">(${count})</span></span>`
+      ).join('');
     }
 
     function renderDashboard() {
@@ -933,7 +1154,8 @@
       const urgentReqs = activeReqs.filter(r => r.prioritas === 'Tinggi');
       const waDone = state.sales.filter(s => s.waStatus === 'Sudah Lapor').length;
       const totalSales = state.sales.length || 1;
-      const hotVisits = state.sales.reduce((acc, s) => acc + s.history.filter(h => h.hasil === 'Prospek Panas').length, 0);
+      const allReports = getAllVisitReports();
+      const hotReports = allReports.filter(h => h.hasil === 'Prospek Panas');
 
       document.getElementById('kpiTotalPagu').textContent = formatRupiah(totalPagu);
       document.getElementById('kpiTotalPaket').textContent = `${state.sirup.length} paket pengadaan terdata`;
@@ -941,7 +1163,35 @@
       document.getElementById('kpiUrgentReq').textContent = `${urgentReqs.length} prioritas tinggi`;
       document.getElementById('kpiWaDone').textContent = `${waDone} / ${state.sales.length}`;
       document.getElementById('kpiWaPct').textContent = `${Math.round((waDone / totalSales) * 100)}% sales sudah lapor`;
-      document.getElementById('kpiHotVisits').textContent = hotVisits;
+      document.getElementById('kpiHotVisits').textContent = hotReports.length;
+
+      // Statistik Proposal Pusat, Visiting & Prospek Panas per Sales
+      const allPrograms = state.programs || [];
+      const visitedPrograms = allPrograms.filter(p => p.status === 'Sudah Visit' || p.status === 'Follow-Up Selesai');
+
+      document.getElementById('statPropTotal').textContent = allPrograms.length;
+      renderSalesChipGroup(
+        'statPropSalesList',
+        allPrograms,
+        p => state.sales.find(s => s.id === p.salesId),
+        'bg-sky-50 text-sky-800 border-sky-200'
+      );
+
+      document.getElementById('statVisitTotal').textContent = visitedPrograms.length;
+      renderSalesChipGroup(
+        'statVisitSalesList',
+        visitedPrograms,
+        p => state.sales.find(s => s.id === p.salesId),
+        'bg-indigo-50 text-indigo-800 border-indigo-200'
+      );
+
+      document.getElementById('statHotTotal').textContent = hotReports.length;
+      renderSalesChipGroup(
+        'statHotSalesList',
+        hotReports,
+        h => ({ nama: h.salesNama }),
+        'bg-rose-50 text-rose-800 border-rose-200'
+      );
 
       const topPkg = [...state.sirup].sort((a, b) => calcAiScore(b) - calcAiScore(a))[0];
       const needWa = state.sales.filter(s => s.waStatus === 'Belum Di-WA' || s.waStatus === 'Butuh Eskalasi');
@@ -1308,18 +1558,51 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function buildWaMessage(sales, tone) {
+    function buildWaMessage(sales, tone, topic = 'prioritas_jadwal') {
       const reqs = state.requests.filter(r => r.salesId === sales.id && r.status !== 'Selesai');
       const progs = (state.programs || []).filter(p => p.salesId === sales.id && p.status !== 'Follow-Up Selesai');
+
+      const progScheduleLines = progs.length
+        ? progs.map((p, i) => `${i + 1}. *${p.klpd} (${p.satker})*\n   • Proposal/RAB Pusat: _${p.judul}_\n   • Target Jadwal Visit: *${p.targetVisit}* (Status: ${p.status})`).join('\n')
+        : '- Belum ada proposal/RAB Program Pusat aktif, silakan konfirmasi jadwal visit relasi KLPD prioritas minggu ini.';
+
+      const progAfterVisitLines = progs.length
+        ? progs.map((p, i) => `${i + 1}. *${p.klpd} (${p.satker})* — _${p.judul}_ (Visit: ${p.targetVisit})`).join('\n')
+        : '';
 
       const reqLines = reqs.length
         ? '*[Request Sales]*\n' + reqs.map((r, i) => `${i + 1}. *${r.instansi}* — ${r.kategori} (Status: ${r.status})`).join('\n')
         : '';
-      const progLines = progs.length
+
+      // Topik 1: Prioritas Jadwal Kunjungan atas Program Pusat Proposal/RAB
+      if (topic === 'prioritas_jadwal') {
+        if (tone === 'tegas') {
+          return `Halo ${sales.nama}, selamat pagi.\n\nSesuai monitoring NSM untuk area *${sales.area}*, mohon prioritaskan *jadwal kunjungan lapangan* atas Proposal/RAB Program Pusat berikut:\n\n${progScheduleLines}\n\nMohon konfirmasi kepastian hari & jam visit ke pejabat KLPD/PPK terkait hari ini maksimal pukul 15.00 WIB agar dukungan dari pusat bisa kita kawal penuh. Terima kasih.`;
+        }
+        if (tone === 'singkat') {
+          return `Pagi ${sales.nama}, izin reminder prioritas jadwal kunjungan untuk Proposal/RAB Pusat berikut ya:\n\n${progScheduleLines}\n\nKira-kira jadwal visit ke KLPD-nya fix hari apa? Kabari ya biar pusat siap bantu support. Makasih!`;
+        }
+        return `Selamat pagi ${sales.nama}, semoga aktivitas di *${sales.area}* lancar hari ini.\n\nMenindaklanjuti Proposal/RAB dari Pusat yang sudah disiapkan, mohon jadikan *prioritas jadwal kunjungan* ke relasi KLPD berikut minggu ini:\n\n${progScheduleLines}\n\nMohon infokan rencana tanggal visit-nya dan apakah ada bahan tambahan dari pusat yang perlu disiapkan sebelum bertemu PPK/pejabat terkait. Terima kasih!`;
+      }
+
+      // Topik 2: Follow-Up atas Proposal/RAB Setelah Kunjungan
+      if (topic === 'followup_setelah_visit') {
+        const listAfterVisit = [progAfterVisitLines, reqLines].filter(Boolean).join('\n\n')
+          || '- Mohon update hasil kunjungan terbaru ke relasi KLPD/Dinas di area Anda minggu ini.';
+        if (tone === 'tegas') {
+          return `Halo ${sales.nama}, selamat pagi.\n\nMenindaklanjuti kunjungan lapangan yang sudah dilakukan di *${sales.area}*, mohon kirimkan *laporan hasil kunjungan & follow-up Proposal/RAB* untuk instansi berikut:\n\n${listAfterVisit}\n\nMohon rincikan: (1) Respon PPK/pejabat KLPD, (2) Apakah ada revisi spesifikasi/RAB/harga, dan (3) Estimasi jadwal tayang/closing e-Katalog. Ditunggu hari ini ya. Terima kasih.`;
+        }
+        if (tone === 'singkat') {
+          return `Pagi ${sales.nama}, bagaimana hasil visit & respon KLPD atas Proposal/RAB berikut?\n\n${listAfterVisit}\n\nDitunggu update hasil kunjungannya (respon PPK & tindak lanjut RAB/katalog) ya. Makasih!`;
+        }
+        return `Selamat pagi ${sales.nama}, terima kasih atas kunjungan lapangan yang sudah dijalankan di *${sales.area}*.\n\nSaya ingin *follow-up hasil kunjungan atas Proposal/RAB* yang sudah disampaikan ke relasi KLPD berikut:\n\n${listAfterVisit}\n\nBagaimana tanggapan dari PPK/pejabat setempat setelah paparan proposal? Jika diperlukan penyesuaian RAB, surat dukungan, atau approval diskon khusus dari NSM untuk mengunci peluangnya, langsung sampaikan ya. Terima kasih!`;
+      }
+
+      // Topik 3: Gabungan Request Sales & Program Pusat
+      const progBlock = progs.length
         ? '*[Program Pusat — Visit KLPD]*\n' + progs.map((p, i) => `${i + 1}. *${p.klpd} (${p.satker})* — ${p.judul} (Target: ${p.targetVisit})`).join('\n')
         : '';
-
-      const combinedLines = [reqLines, progLines].filter(Boolean).join('\n\n') || '- Belum ada request/program pusat terbuka, mohon update kunjungan prospek area minggu ini.';
+      const combinedLines = [reqLines, progBlock].filter(Boolean).join('\n\n') || '- Belum ada request/program pusat terbuka, mohon update kunjungan prospek area minggu ini.';
 
       if (tone === 'tegas') {
         return `Halo ${sales.nama}, selamat pagi.\n\nSesuai jadwal evaluasi mingguan NSM, mohon laporan hasil kunjungan lapangan Anda untuk area *${sales.area}* atas daftar berikut:\n\n${combinedLines}\n\nMohon kirimkan ringkasan respon PPK/KLPD, kendala harga/katalog (jika ada), dan target closing hari ini maksimal pukul 16.00 WIB. Terima kasih.`;
@@ -1413,21 +1696,119 @@
       }
 
       const tone = document.getElementById('waToneSelect').value;
-      document.getElementById('waMessageDraft').value = buildWaMessage(sel, tone);
+      const topic = document.getElementById('waDraftTopicSelect')?.value || 'prioritas_jadwal';
+      document.getElementById('waMessageDraft').value = buildWaMessage(sel, tone, topic);
 
       const histEl = document.getElementById('selSalesHistory');
       histEl.innerHTML = sel.history.length
         ? [...sel.history].reverse().map(h => `
           <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs">
-            <div class="flex items-center justify-between gap-2">
-              <span class="font-bold text-slate-800">${escapeHtml(h.instansi)}</span>
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">${escapeHtml(h.sumberJenis || 'Kunjungan')}</span>
+                <span class="font-bold text-slate-800">${escapeHtml(h.instansi)}</span>
+              </div>
               <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700">${escapeHtml(h.hasil)}</span>
             </div>
             <p class="text-slate-600 mt-1">${escapeHtml(h.ringkasan)}</p>
-            <p class="text-[10px] text-slate-400 mt-1">Dicatat: ${escapeHtml(h.tanggal)}</p>
+            <p class="text-[10px] text-slate-400 mt-1">Tanggal Visit: ${escapeHtml(h.tanggal)} ${h.refId && h.refId !== '-' ? '• Ref: ' + escapeHtml(h.refId) : ''}</p>
           </div>
         `).join('')
         : '<p class="text-xs text-slate-400 italic">Belum ada riwayat kunjungan tercatat.</p>';
+    }
+
+    function renderReports() {
+      const salesSelect = document.getElementById('repFilterSales');
+      const curSales = salesSelect.value;
+      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.nama)}</option>`).join('');
+      salesSelect.value = curSales;
+
+      const q = (document.getElementById('repSearch')?.value || '').trim().toLowerCase();
+      const fSales = salesSelect.value;
+      const fSource = document.getElementById('repFilterSource').value;
+      const fHasil = document.getElementById('repFilterHasil').value;
+
+      const allReports = getAllVisitReports();
+      const filtered = allReports.filter(r => {
+        const matchQ = !q || [r.id, r.salesNama, r.instansi, r.judulProgram, r.ringkasan, r.refId].join(' ').toLowerCase().includes(q);
+        const matchS = !fSales || r.salesId === fSales;
+        const matchSrc = !fSource || r.sumberJenis === fSource;
+        const matchH = !fHasil || r.hasil === fHasil;
+        return matchQ && matchS && matchSrc && matchH;
+      });
+
+      const summaryEl = document.getElementById('reportSummaryCards');
+      const progCount = filtered.filter(r => r.sumberJenis === 'Program Pusat').length;
+      const reqCount = filtered.filter(r => r.sumberJenis === 'Request Sales').length;
+      const hotCount = filtered.filter(r => r.hasil === 'Prospek Panas').length;
+      summaryEl.innerHTML = `
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <p class="text-[11px] text-slate-500">Total Laporan Visit</p>
+          <p class="text-lg font-bold text-slate-900 mt-0.5 tabular-nums">${filtered.length}</p>
+        </div>
+        <div class="bg-sky-50/70 border border-sky-200 rounded-xl p-3">
+          <p class="text-[11px] text-sky-700">Laporan Program Pusat</p>
+          <p class="text-lg font-bold text-sky-900 mt-0.5 tabular-nums">${progCount}</p>
+        </div>
+        <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-3">
+          <p class="text-[11px] text-amber-700">Laporan Request Sales</p>
+          <p class="text-lg font-bold text-amber-900 mt-0.5 tabular-nums">${reqCount}</p>
+        </div>
+        <div class="bg-rose-50/70 border border-rose-200 rounded-xl p-3">
+          <p class="text-[11px] text-rose-700">Hasil Prospek Panas</p>
+          <p class="text-lg font-bold text-rose-900 mt-0.5 tabular-nums">${hotCount}</p>
+        </div>
+      `;
+
+      document.getElementById('reportCountLabel').textContent = `${filtered.length} Laporan`;
+      const container = document.getElementById('reportsListContainer');
+      const empty = document.getElementById('reportsEmpty');
+      container.innerHTML = '';
+
+      if (filtered.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      const hasilColors = {
+        'Prospek Panas': 'bg-rose-50 text-rose-700 border-rose-200',
+        'Menunggu Anggaran': 'bg-amber-50 text-amber-700 border-amber-200',
+        'Butuh Penawaran Ulang': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'Batal / Kalah': 'bg-slate-100 text-slate-600 border-slate-200'
+      };
+      const sourceColors = {
+        'Program Pusat': 'bg-sky-50 text-sky-700 border-sky-200',
+        'Request Sales': 'bg-amber-50 text-amber-700 border-amber-200',
+        'Kunjungan Umum': 'bg-slate-100 text-slate-700 border-slate-200'
+      };
+
+      filtered.forEach(rep => {
+        const row = document.createElement('div');
+        row.className = 'p-4 sm:p-5 hover:bg-slate-50/70 transition-colors space-y-2.5';
+        row.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-mono text-[11px] font-bold text-slate-500">${escapeHtml(rep.id)}</span>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${sourceColors[rep.sumberJenis] || 'bg-slate-100 text-slate-700'}">${escapeHtml(rep.sumberJenis)}</span>
+              ${rep.refId && rep.refId !== '-' ? `<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700">${escapeHtml(rep.refId)}</span>` : ''}
+              <span class="text-[11px] text-slate-500">Tanggal Visit: <strong class="text-slate-800">${escapeHtml(rep.tanggal)}</strong></span>
+            </div>
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${hasilColors[rep.hasil] || 'bg-slate-100 text-slate-700'}">${escapeHtml(rep.hasil)}</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+            <div class="md:col-span-4">
+              <p class="text-xs font-bold text-slate-900">${escapeHtml(rep.instansi)}</p>
+              <p class="text-[11px] text-indigo-600 font-medium mt-0.5">${escapeHtml(rep.judulProgram)}</p>
+              <p class="text-[11px] text-slate-500 mt-1">Sales: <strong class="text-slate-800">${escapeHtml(rep.salesNama)}</strong> (${escapeHtml(rep.salesArea)})</p>
+            </div>
+            <div class="md:col-span-8 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 leading-relaxed">
+              <span class="font-semibold text-slate-900">Ringkasan Hasil Kunjungan &amp; Tindak Lanjut:</span> ${escapeHtml(rep.ringkasan)}
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
     }
 
     function openAddRequestModal(prefillPkg = null) {
@@ -1660,8 +2041,8 @@
 
       const refOptions = [
         '<option value="">-- Kunjungan Umum / Ketik Manual Instansi --</option>',
-        ...activeReqs.map(r => `<option value="REQ:${escapeHtml(r.id)}" data-instansi="${escapeHtml(r.instansi)}">[Request ${escapeHtml(r.id)}] ${escapeHtml(r.instansi)} — ${escapeHtml(r.kategori)}</option>`),
-        ...activeProgs.map(p => `<option value="PRG:${escapeHtml(p.id)}" data-instansi="${escapeHtml(p.satker)}">[Program ${escapeHtml(p.id)}] ${escapeHtml(p.klpd)} — ${escapeHtml(p.judul)}</option>`)
+        ...activeProgs.map(p => `<option value="PRG:${escapeHtml(p.id)}" data-instansi="${escapeHtml(p.satker)}" data-judul="${escapeHtml(p.judul)}">[Program ${escapeHtml(p.id)}] ${escapeHtml(p.klpd)} — ${escapeHtml(p.judul)}</option>`),
+        ...activeReqs.map(r => `<option value="REQ:${escapeHtml(r.id)}" data-instansi="${escapeHtml(r.instansi)}" data-judul="${escapeHtml(r.kategori)}">[Request ${escapeHtml(r.id)}] ${escapeHtml(r.instansi)} — ${escapeHtml(r.kategori)}</option>`)
       ].join('');
 
       openModal(`Reporting Hasil Kunjungan Sales — ${sales.nama}`, `
@@ -1671,7 +2052,7 @@
             <p class="text-slate-600 mt-0.5">Area: ${escapeHtml(sales.area)} • WhatsApp: +${escapeHtml(sales.wa)}</p>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tautkan Request / Program Pusat (Opsional)</label>
+            <label class="block font-semibold text-slate-700 mb-1">Tautkan Program Pusat / Request Sales (Opsional)</label>
             <select id="visitRefSelect" name="refItem" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${refOptions}</select>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1729,34 +2110,48 @@
         const ringkasan = fd.get('ringkasan').trim();
         const refItem = fd.get('refItem') || '';
 
-        sales.history.push({
-          tanggal: tanggalVisit,
-          instansi,
-          hasil,
-          ringkasan
-        });
-        sales.waStatus = fd.get('waStatus');
+        let sumberJenis = 'Kunjungan Umum';
+        let refId = '-';
+        let judulProgram = instansi;
 
         if (refItem.startsWith('PRG:')) {
           const pId = refItem.slice(4);
+          sumberJenis = 'Program Pusat';
+          refId = pId;
           const prog = (state.programs || []).find(p => p.id === pId);
           if (prog) {
+            judulProgram = prog.judul;
             prog.status = 'Follow-Up Selesai';
             prog.waReportStatus = 'Sudah Lapor Hasil';
             prog.hasilKunjungan = `${tanggalVisit} • [${hasil}] ${ringkasan}`;
           }
         } else if (refItem.startsWith('REQ:')) {
           const rId = refItem.slice(4);
+          sumberJenis = 'Request Sales';
+          refId = rId;
           const req = state.requests.find(r => r.id === rId);
-          if (req && hasil === 'Batal / Kalah') {
-            req.status = 'Selesai';
+          if (req) {
+            judulProgram = req.kategori;
+            if (hasil === 'Batal / Kalah') req.status = 'Selesai';
           }
         }
+
+        sales.history.push({
+          id: 'LAP-' + Math.floor(100 + Math.random() * 900),
+          tanggal: tanggalVisit,
+          sumberJenis,
+          refId,
+          judulProgram,
+          instansi,
+          hasil,
+          ringkasan
+        });
+        sales.waStatus = fd.get('waStatus');
 
         saveState();
         closeModal();
         renderAll();
-        showToast(`Laporan kunjungan ${sales.nama} berhasil disimpan.`, 'success');
+        showToast(`Laporan kunjungan ${sales.nama} tersimpan ke Riwayat Database.`, 'success');
       });
     }
 
@@ -1910,6 +2305,29 @@
       showToast('Laporan mingguan CSV berhasil diunduh.', 'success');
     }
 
+    function exportReportsOnlyXlsx() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Library Excel sedang dimuat, silakan coba sebentar lagi.', 'error');
+        return;
+      }
+      const wb = XLSX.utils.book_new();
+      const rows = getAllVisitReports().map(r => ({
+        ID_Laporan: r.id,
+        Tanggal_Visit: r.tanggal,
+        Nama_Sales: r.salesNama,
+        Wilayah_Area: r.salesArea,
+        Sumber_Tugas: r.sumberJenis,
+        Kode_Referensi: r.refId,
+        Judul_Proposal_Request: r.judulProgram,
+        Instansi_KLPD: r.instansi,
+        Hasil_Kunjungan: r.hasil,
+        Ringkasan_Laporan: r.ringkasan
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Laporan_Kunjungan');
+      XLSX.writeFile(wb, `Laporan_Hasil_Kunjungan_NSM_${getTodayISO()}.xlsx`);
+      showToast('Laporan hasil kunjungan berhasil diekspor ke Excel.', 'success');
+    }
+
     function exportAllDatabaseXlsx() {
       if (typeof XLSX === 'undefined') {
         showToast('Library Excel sedang dimuat, silakan coba sebentar lagi.', 'error');
@@ -1968,13 +2386,26 @@
           Hasil_Kunjungan: p.hasilKunjungan || ''
         };
       });
+      const historyRows = getAllVisitReports().map(r => ({
+        ID_Laporan: r.id,
+        Tanggal_Visit: r.tanggal,
+        ID_Sales: r.salesId,
+        Nama_Sales: r.salesNama,
+        Sumber_Tugas: r.sumberJenis,
+        Kode_Referensi: r.refId,
+        Judul_Proposal_Request: r.judulProgram,
+        Instansi_KLPD: r.instansi,
+        Hasil_Kunjungan: r.hasil,
+        Ringkasan_Laporan: r.ringkasan
+      }));
 
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sirupRows), 'SIRUP');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salesRows), 'Sales');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(requestRows), 'Request');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(programRows), 'Program_Pusat');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(historyRows), 'Riwayat_Kunjungan');
       XLSX.writeFile(wb, `Backup_Database_NSM_AI_${getTodayISO()}.xlsx`);
-      showToast('Seluruh database (4 sheet) berhasil disimpan ke file Excel.', 'success');
+      showToast('Seluruh database (5 sheet termasuk Riwayat Kunjungan) berhasil disimpan.', 'success');
     }
 
     function downloadExcelTemplate() {
@@ -2048,12 +2479,28 @@
         }
       ];
 
+      const historyRows = [
+        {
+          ID_Laporan: 'LAP-101',
+          Tanggal_Visit: '2026-11-24',
+          ID_Sales: 'SLS-01',
+          Nama_Sales: 'Budi Santoso',
+          Sumber_Tugas: 'Program Pusat',
+          Kode_Referensi: 'PRG-203',
+          Judul_Proposal_Request: 'Proposal Pengadaan Buku & Perangkat Pembelajaran TKDN',
+          Instansi_KLPD: 'Dinas Pendidikan dan Kebudayaan Kab. Boyolali',
+          Hasil_Kunjungan: 'Prospek Panas',
+          Ringkasan_Laporan: 'PPK menyetujui spesifikasi proposal dan menjadwalkan klik e-Katalog minggu depan.'
+        }
+      ];
+
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sirupRows), 'SIRUP');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salesRows), 'Sales');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(requestRows), 'Request');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(programRows), 'Program_Pusat');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(historyRows), 'Riwayat_Kunjungan');
       XLSX.writeFile(wb, 'Template_Database_NSM_AI.xlsx');
-      showToast('Template Excel (4 Sheet: SIRUP, Sales, Request, Program_Pusat) berhasil diunduh.', 'success');
+      showToast('Template Excel (5 Sheet) berhasil diunduh.', 'success');
     }
 
     function openExcelHubModal() {
@@ -2062,7 +2509,7 @@
           <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p class="font-bold text-indigo-900">1. Unduh Template Excel Resmi</p>
-              <p class="text-indigo-700 mt-0.5">Berisi 4 sheet siap isi: <strong>SIRUP</strong>, <strong>Sales</strong>, <strong>Request</strong>, dan <strong>Program_Pusat</strong>.</p>
+              <p class="text-indigo-700 mt-0.5">Berisi 5 sheet siap isi: <strong>SIRUP</strong>, <strong>Sales</strong>, <strong>Request</strong>, <strong>Program_Pusat</strong>, dan <strong>Riwayat_Kunjungan</strong>.</p>
             </div>
             <button type="button" id="btnDownloadTemplateXlsx" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -2076,11 +2523,12 @@
               <div>
                 <label class="block font-semibold text-slate-700 mb-1">Target Sheet / Database</label>
                 <select name="target" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                  <option value="auto">Otomatis (Semua Sheet: SIRUP, Sales, Request, Program_Pusat)</option>
+                  <option value="auto">Otomatis (Semua Sheet: SIRUP, Sales, Request, Program_Pusat, Riwayat_Kunjungan)</option>
                   <option value="sirup">Hanya Sheet Pertama -&gt; SIRUP</option>
                   <option value="sales">Hanya Sheet Pertama -&gt; Database Sales</option>
                   <option value="request">Hanya Sheet Pertama -&gt; Request Sales</option>
                   <option value="program">Hanya Sheet Pertama -&gt; Program Pusat</option>
+                  <option value="history">Hanya Sheet Pertama -&gt; Riwayat Kunjungan</option>
                 </select>
               </div>
               <div>
@@ -2125,7 +2573,7 @@
           try {
             const data = new Uint8Array(evt.target.result);
             const wb = XLSX.read(data, { type: 'array', cellDates: true });
-            let counts = { sirup: 0, sales: 0, request: 0, program: 0 };
+            let counts = { sirup: 0, sales: 0, request: 0, program: 0, history: 0 };
             const resolveSalesId = (rawId, rawName) => {
               const idStr = String(rawId || '').trim();
               if (idStr && state.sales.some(s => s.id === idStr)) return idStr;
@@ -2228,6 +2676,34 @@
               counts.program += mapped.length;
             };
 
+            const processHistory = (rows) => {
+              if (mode === 'replace') {
+                state.sales.forEach(s => { s.history = []; });
+              }
+              rows.forEach(r => {
+                const instansi = String(r.Instansi_KLPD || r.instansi || '').trim();
+                const ringkasan = String(r.Ringkasan_Laporan || r.ringkasan || '').trim();
+                if (!instansi && !ringkasan) return;
+                const sId = resolveSalesId(r.ID_Sales || r.salesId, r.Nama_Sales);
+                const sls = state.sales.find(s => s.id === sId);
+                if (!sls) return;
+                const item = {
+                  id: String(r.ID_Laporan || r.id || ('LAP-' + Math.floor(100 + Math.random() * 900))).trim(),
+                  tanggal: normalizeExcelDate(r.Tanggal_Visit ?? r.tanggal, getTodayISO()),
+                  sumberJenis: String(r.Sumber_Tugas || r.sumberJenis || 'Kunjungan Umum').trim(),
+                  refId: String(r.Kode_Referensi || r.refId || '-').trim(),
+                  judulProgram: String(r.Judul_Proposal_Request || r.judulProgram || instansi).trim(),
+                  instansi: instansi || '-',
+                  hasil: String(r.Hasil_Kunjungan || r.hasil || 'Menunggu Anggaran').trim(),
+                  ringkasan: ringkasan || '-'
+                };
+                const idx = sls.history.findIndex(x => x.id === item.id);
+                if (idx >= 0) sls.history[idx] = item;
+                else sls.history.push(item);
+                counts.history++;
+              });
+            };
+
             if (target === 'auto') {
               wb.SheetNames.forEach(name => {
                 const low = name.toLowerCase();
@@ -2241,6 +2717,7 @@
                 if (low.includes('sirup')) processSirup(rows);
                 else if (low.includes('req')) processRequests(rows);
                 else if (low.includes('program') || low.includes('pusat')) processPrograms(rows);
+                else if (low.includes('riwayat') || low.includes('kunjungan') || low.includes('history')) processHistory(rows);
               });
             } else {
               const firstRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
@@ -2248,9 +2725,10 @@
               if (target === 'sales') processSales(firstRows);
               if (target === 'request') processRequests(firstRows);
               if (target === 'program') processPrograms(firstRows);
+              if (target === 'history') processHistory(firstRows);
             }
 
-            if (counts.sirup + counts.sales + counts.request + counts.program === 0) {
+            if (counts.sirup + counts.sales + counts.request + counts.program + counts.history === 0) {
               showToast('Tidak ada baris valid ditemukan. Pastikan nama sheet/kolom sesuai template.', 'error');
               return;
             }
@@ -2260,7 +2738,7 @@
             saveState();
             closeModal();
             renderAll();
-            showToast(`Berhasil update Excel: ${counts.sirup} SIRUP, ${counts.sales} Sales, ${counts.request} Request, ${counts.program} Program Pusat.`, 'success');
+            showToast(`Berhasil update Excel: ${counts.sirup} SIRUP, ${counts.sales} Sales, ${counts.request} Request, ${counts.program} Program, ${counts.history} Riwayat Visit.`, 'success');
           } catch (err) {
             showToast('Gagal membaca file Excel. Gunakan format .xlsx/.xls/.csv yang valid.', 'error');
           }
@@ -2499,8 +2977,12 @@
         if (sales) {
           sales.waStatus = 'Sudah Lapor';
           sales.history.push({
+            id: 'LAP-' + Math.floor(100 + Math.random() * 900),
             tanggal: tanggalVisit,
-            instansi: `${prog.satker} (${prog.id})`,
+            sumberJenis: 'Program Pusat',
+            refId: prog.id,
+            judulProgram: prog.judul,
+            instansi: prog.satker,
             hasil,
             ringkasan
           });
@@ -2508,7 +2990,7 @@
         saveState();
         closeModal();
         renderAll();
-        showToast(`Laporan visit ${prog.id} tersimpan & tersinkron ke Follow-Up WA.`, 'success');
+        showToast(`Laporan visit ${prog.id} tersimpan ke Riwayat Database.`, 'success');
       });
     }
 
@@ -2519,6 +3001,7 @@
       if (activeTab === 'requests') renderRequests();
       if (activeTab === 'program') renderPrograms();
       if (activeTab === 'followup') renderFollowUp();
+      if (activeTab === 'reports') renderReports();
       if (window.lucide) lucide.createIcons();
     }
 
@@ -2564,6 +3047,7 @@
     document.getElementById('waFilterStatus').addEventListener('change', renderFollowUp);
     document.getElementById('waSearchSales').addEventListener('input', renderFollowUp);
     document.getElementById('waToneSelect').addEventListener('change', renderFollowUp);
+    document.getElementById('waDraftTopicSelect').addEventListener('change', renderFollowUp);
     document.getElementById('btnRegenerateWA').addEventListener('click', () => {
       renderFollowUp();
       showToast('Draf pesan WA disusun ulang oleh AI.', 'info');
@@ -2587,9 +3071,16 @@
     });
 
     document.getElementById('btnLogVisitResult').addEventListener('click', openLogVisitModal);
+    document.getElementById('btnViewAllReports').addEventListener('click', () => switchTab('reports'));
     document.getElementById('btnAddSales').addEventListener('click', openAddSalesModal);
     document.getElementById('btnEditSales').addEventListener('click', openEditSalesModal);
     document.getElementById('btnExportWeekly').addEventListener('click', exportWeeklyCsv);
+
+    ['repSearch', 'repFilterSales', 'repFilterSource', 'repFilterHasil'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderReports);
+    });
+    document.getElementById('btnPrintReport').addEventListener('click', () => window.print());
+    document.getElementById('btnExportReportsXlsx').addEventListener('click', exportReportsOnlyXlsx);
 
     document.getElementById('btnResetDemo').addEventListener('click', () => {
       openModal('Reset Data Demo', `
