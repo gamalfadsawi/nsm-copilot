@@ -920,79 +920,35 @@
     }
 
     function buildSalesPickerHtml(inputName, selectedSalesId = '', required = true) {
-      const listId = 'dl_sales_' + Math.random().toString(36).slice(2, 8);
-      const selObj = state.sales.find(s => s.id === selectedSalesId) || (required ? state.sales[0] : null);
-      const initialVal = selObj ? `[${selObj.id}] ${selObj.nama}` : '';
-      const opts = state.sales.map(s => `<option value="[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}">${escapeHtml(getRoleLabelFromId(s.id, s.jabatan))} • ${escapeHtml(s.area)}</option>`).join('');
+      const targetId = selectedSalesId || (required && state.sales[0] ? state.sales[0].id : '');
+      const placeholder = required ? '' : '<option value="">-- Pilih Sales --</option>';
+      const opts = state.sales.map(s =>
+        `<option value="${escapeHtml(s.id)}" ${s.id === targetId ? 'selected' : ''}>[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`
+      ).join('');
       return `
-        <div class="relative">
-          <input type="text" list="${listId}" data-sales-picker="${escapeHtml(inputName)}" value="${escapeHtml(initialVal)}" ${required ? 'required' : ''} autocomplete="off" placeholder="Ketik ID atau nama sales..." class="w-full px-3 py-2 pr-7 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          <datalist id="${listId}">${opts}</datalist>
-          <input type="hidden" name="${escapeHtml(inputName)}" value="${escapeHtml(selObj ? selObj.id : '')}" />
-        </div>
+        <select name="${escapeHtml(inputName)}" ${required ? 'required' : ''} class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          ${placeholder}${opts}
+        </select>
       `;
     }
 
     function buildSirupPickerHtml(inputName, selectedSirupId = '') {
-      const listId = 'dl_sirup_' + Math.random().toString(36).slice(2, 8);
-      const selObj = state.sirup.find(p => p.id === selectedSirupId);
-      const initialVal = selObj ? `${selObj.id} — ${selObj.klpd}` : (selectedSirupId || '');
-      const opts = state.sirup.map(p => `<option value="${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}">${escapeHtml(p.namaPaket)}</option>`).join('');
+      const opts = state.sirup.map(p =>
+        `<option value="${escapeHtml(p.id)}" ${p.id === selectedSirupId ? 'selected' : ''}>${escapeHtml(p.id)} — ${escapeHtml(p.klpd)} (${escapeHtml(p.namaPaket)})</option>`
+      ).join('');
+      const orphanOpt = (selectedSirupId && !state.sirup.some(p => p.id === selectedSirupId))
+        ? `<option value="${escapeHtml(selectedSirupId)}" selected>${escapeHtml(selectedSirupId)}</option>`
+        : '';
       return `
-        <div class="relative">
-          <input type="text" list="${listId}" data-sirup-picker="${escapeHtml(inputName)}" value="${escapeHtml(initialVal)}" autocomplete="off" placeholder="Ketik kode RUP, KLPD, atau nama paket..." class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          <datalist id="${listId}">${opts}</datalist>
-          <input type="hidden" name="${escapeHtml(inputName)}" value="${escapeHtml(selObj ? selObj.id : selectedSirupId)}" />
-        </div>
+        <select name="${escapeHtml(inputName)}" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>
+          ${orphanOpt}${opts}
+        </select>
       `;
     }
 
-    function resolveSalesIdFromInputText(rawText) {
-      const txt = String(rawText || '').trim();
-      if (!txt) return '';
-      const bracketMatch = txt.match(/^\[([^\]]+)\]/);
-      if (bracketMatch) {
-        const found = state.sales.find(s => s.id.toUpperCase() === bracketMatch[1].trim().toUpperCase());
-        if (found) return found.id;
-      }
-      const exactId = state.sales.find(s => s.id.toUpperCase() === txt.toUpperCase());
-      if (exactId) return exactId.id;
-      const exactName = state.sales.find(s => s.nama.toLowerCase() === txt.toLowerCase());
-      if (exactName) return exactName.id;
-      const partial = state.sales.find(s => `[${s.id}] ${s.nama}`.toLowerCase().includes(txt.toLowerCase()) || s.nama.toLowerCase().includes(txt.toLowerCase()));
-      return partial ? partial.id : '';
-    }
-
-    function resolveSirupIdFromInputText(rawText) {
-      const txt = String(rawText || '').trim();
-      if (!txt) return '';
-      const dashSplit = txt.split('—')[0].trim();
-      const found = state.sirup.find(p => p.id.toUpperCase() === dashSplit.toUpperCase() || p.id.toUpperCase() === txt.toUpperCase());
-      if (found) return found.id;
-      const partial = state.sirup.find(p => `${p.id} — ${p.klpd} ${p.namaPaket}`.toLowerCase().includes(txt.toLowerCase()));
-      return partial ? partial.id : dashSplit;
-    }
-
     function bindModalSearchPickers(formEl) {
-      if (!formEl) return;
-      formEl.querySelectorAll('[data-sales-picker]').forEach(visibleInput => {
-        const hiddenName = visibleInput.dataset.salesPicker;
-        const hiddenInput = formEl.querySelector(`input[type="hidden"][name="${hiddenName}"]`);
-        const syncVal = () => {
-          if (hiddenInput) hiddenInput.value = resolveSalesIdFromInputText(visibleInput.value);
-        };
-        visibleInput.addEventListener('input', syncVal);
-        visibleInput.addEventListener('change', syncVal);
-      });
-      formEl.querySelectorAll('[data-sirup-picker]').forEach(visibleInput => {
-        const hiddenName = visibleInput.dataset.sirupPicker;
-        const hiddenInput = formEl.querySelector(`input[type="hidden"][name="${hiddenName}"]`);
-        const syncVal = () => {
-          if (hiddenInput) hiddenInput.value = resolveSirupIdFromInputText(visibleInput.value);
-        };
-        visibleInput.addEventListener('input', syncVal);
-        visibleInput.addEventListener('change', syncVal);
-      });
+      // Standard <select> dropdowns bind directly to FormData; no text-to-ID sync needed.
     }
 
     function matchesSalesQuery(salesObj, rawQuery) {
@@ -2576,7 +2532,7 @@
       openModal('Catat Permintaan / Request Sales', `
         <form id="formAddRequest" class="space-y-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Nama Sales (Ketik ID / Nama)</label>
+            <label class="block font-semibold text-slate-700 mb-1">Nama Sales</label>
             ${buildSalesPickerHtml('salesId', state.sales[0]?.id || '', true)}
           </div>
           <div>
@@ -2616,7 +2572,7 @@
               <input name="deadline" type="date" required value="${getTodayISO()}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP</label>
               ${buildSirupPickerHtml('sirupId', prefillPkg ? prefillPkg.id : '')}
             </div>
           </div>
@@ -2633,9 +2589,9 @@
       formAddReq.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formAddReq.querySelector('[data-sales-picker]')?.value);
+        const resolvedSales = String(fd.get('salesId') || '').trim();
         if (!resolvedSales) {
-          showToast('Pilih Nama Sales yang valid dari daftar.', 'error');
+          showToast('Pilih Nama Sales dari daftar.', 'error');
           return;
         }
         const newReq = {
@@ -2647,7 +2603,7 @@
           prioritas: fd.get('prioritas'),
           deadline: fd.get('deadline'),
           status: 'Baru',
-          sirupId: fd.get('sirupId') || resolveSirupIdFromInputText(formAddReq.querySelector('[data-sirup-picker]')?.value),
+          sirupId: String(fd.get('sirupId') || '').trim(),
           createdAt: getTodayISO()
         };
         syncRequestStatusChange(newReq, fd.get('status') || 'Baru');
@@ -2663,7 +2619,7 @@
       openModal(`Edit Request Sales — ${req.id}`, `
         <form id="formEditRequest" class="space-y-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Nama Sales (Ketik ID / Nama)</label>
+            <label class="block font-semibold text-slate-700 mb-1">Nama Sales</label>
             ${buildSalesPickerHtml('salesId', req.salesId, true)}
           </div>
           <div>
@@ -2700,7 +2656,7 @@
               <input name="deadline" type="date" required value="${escapeHtml(normalizeExcelDate(req.deadline, getTodayISO()))}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP</label>
               ${buildSirupPickerHtml('sirupId', req.sirupId)}
             </div>
           </div>
@@ -2726,9 +2682,9 @@
       formEditReq.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formEditReq.querySelector('[data-sales-picker]')?.value);
+        const resolvedSales = String(fd.get('salesId') || '').trim();
         if (!resolvedSales) {
-          showToast('Pilih Nama Sales yang valid dari daftar.', 'error');
+          showToast('Pilih Nama Sales dari daftar.', 'error');
           return;
         }
         req.salesId = resolvedSales;
@@ -2737,7 +2693,7 @@
         req.prioritas = fd.get('prioritas');
         req.detail = fd.get('detail').trim();
         req.deadline = fd.get('deadline');
-        req.sirupId = fd.get('sirupId') || resolveSirupIdFromInputText(formEditReq.querySelector('[data-sirup-picker]')?.value);
+        req.sirupId = String(fd.get('sirupId') || '').trim();
         syncRequestStatusChange(req, fd.get('status'));
         saveState();
         closeModal();
@@ -4043,7 +3999,7 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit (Ketik)</label>
+              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit</label>
               ${buildSalesPickerHtml('salesId', prog.salesId, true)}
             </div>
             <div>
@@ -4058,7 +4014,7 @@
             </div>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Opsional)</label>
             ${buildSirupPickerHtml('sirupId', prog.sirupId)}
           </div>
           <div>
@@ -4087,9 +4043,9 @@
       formEditProg.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formEditProg.querySelector('[data-sales-picker]')?.value);
+        const resolvedSales = String(fd.get('salesId') || '').trim();
         if (!resolvedSales) {
-          showToast('Pilih Sales Visit yang valid dari daftar.', 'error');
+          showToast('Pilih Sales Visit dari daftar.', 'error');
           return;
         }
         prog.judul = fd.get('judul').trim();
@@ -4097,7 +4053,7 @@
         prog.satker = fd.get('satker').trim();
         prog.salesId = resolvedSales;
         prog.targetVisit = fd.get('targetVisit');
-        prog.sirupId = fd.get('sirupId') || resolveSirupIdFromInputText(formEditProg.querySelector('[data-sirup-picker]')?.value);
+        prog.sirupId = String(fd.get('sirupId') || '').trim();
         prog.ringkasanProposal = fd.get('ringkasanProposal').trim();
         syncProgramStatusChange(prog, fd.get('status'));
         saveState();
@@ -4126,7 +4082,7 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit (Ketik)</label>
+              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit</label>
               ${buildSalesPickerHtml('salesId', state.sales[0]?.id || '', true)}
             </div>
             <div>
@@ -4141,7 +4097,7 @@
             </div>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Opsional)</label>
             ${buildSirupPickerHtml('sirupId', '')}
           </div>
           <div>
@@ -4160,9 +4116,9 @@
       formAddProg.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formAddProg.querySelector('[data-sales-picker]')?.value);
+        const resolvedSales = String(fd.get('salesId') || '').trim();
         if (!resolvedSales) {
-          showToast('Pilih Sales Visit yang valid dari daftar.', 'error');
+          showToast('Pilih Sales Visit dari daftar.', 'error');
           return;
         }
         const newProg = {
@@ -4170,7 +4126,7 @@
           judul: fd.get('judul').trim(),
           klpd: fd.get('klpd').trim(),
           satker: fd.get('satker').trim(),
-          sirupId: fd.get('sirupId') || resolveSirupIdFromInputText(formAddProg.querySelector('[data-sirup-picker]')?.value),
+          sirupId: String(fd.get('sirupId') || '').trim(),
           salesId: resolvedSales,
           ringkasanProposal: fd.get('ringkasanProposal').trim(),
           targetVisit: fd.get('targetVisit'),
