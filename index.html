@@ -68,6 +68,11 @@
             <span>Follow-Up WA Mingguan</span>
             <span id="badgePendingWA" class="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">0</span>
           </button>
+          <button data-tab="salesdb" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium text-left transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>Database Sales</span>
+            <span id="badgeTotalSales" class="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">0</span>
+          </button>
           <button data-tab="reports" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium text-left transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
             <i data-lucide="file-text" class="w-4 h-4"></i>
             <span>Laporan Kunjungan</span>
@@ -410,9 +415,14 @@
                 <p class="text-xs text-slate-500">Catat kebutuhan sampel buku, surat dukungan, penawaran harga, dan pantau progresnya hingga kunjungan selesai.</p>
               </div>
               <div class="flex flex-wrap items-center gap-2">
-                <select id="reqFilterSales" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
-                  <option value="">Semua Sales</option>
-                </select>
+                <div class="relative">
+                  <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+                  <input id="reqFilterSales" list="reqSalesDatalist" type="text" placeholder="Ketik nama / ID sales..." class="pl-8 pr-6 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-52" />
+                  <datalist id="reqSalesDatalist"></datalist>
+                  <button type="button" id="btnClearReqSales" class="hidden absolute right-2 top-2 text-slate-400 hover:text-slate-700" title="Hapus filter sales">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
                 <select id="reqFilterStatus" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
                   <option value="">Semua Status</option>
                 </select>
@@ -450,9 +460,14 @@
                 <p class="text-xs text-slate-500">Pusat menyiapkan proposal penawaran untuk dibawa sales saat visit ke relasi KLPD, lalu memantau laporan hasil kunjungan via WhatsApp.</p>
               </div>
               <div class="flex flex-wrap items-center gap-2">
-                <select id="progFilterSales" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
-                  <option value="">Semua Sales</option>
-                </select>
+                <div class="relative">
+                  <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+                  <input id="progFilterSales" list="progSalesDatalist" type="text" placeholder="Ketik nama / ID sales..." class="pl-8 pr-6 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 w-52" />
+                  <datalist id="progSalesDatalist"></datalist>
+                  <button type="button" id="btnClearProgSales" class="hidden absolute right-2 top-2 text-slate-400 hover:text-slate-700" title="Hapus filter sales">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
                 <select id="progFilterStatus" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
                   <option value="">Semua Status</option>
                 </select>
@@ -485,9 +500,9 @@
               <p class="text-xs text-slate-500">Pilih sales, pilih topik draf WA (prioritas jadwal kunjungan atau follow-up setelah visit), kirim via WhatsApp, lalu catat hasil kunjungannya.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <button id="btnAddSales" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 transition-colors">
-                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-                <span>Tambah Sales</span>
+              <button id="btnGoSalesDb" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 transition-colors">
+                <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                <span>Kelola Database Sales</span>
               </button>
               <button id="btnExportWeekly" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white transition-colors">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -594,6 +609,74 @@
                   <div id="selSalesHistory" class="space-y-2 max-h-44 overflow-y-auto"></div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 4B: DATABASE SALES -->
+        <section id="view-salesdb" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Database Tim Sales, Manager &amp; Rekanan</h3>
+                <p class="text-xs text-slate-500">Tambah anggota baru (auto-generate ID SP/SR/MP/BM/RKN), lihat rekap data sales yang sudah diinput, dan pantau beban kerja tiap anggota.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="btnAddSales" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors">
+                  <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                  <span>Tambah Sales Baru</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Ringkasan Data Sales yang Sudah Diinput -->
+            <div id="salesDbSummaryCards" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+
+            <!-- Filter Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div class="relative">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+                <input id="salesDbSearch" type="text" placeholder="Cari ID, nama sales, wilayah, no. WA..." class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <select id="salesDbRoleFilter" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                <option value="">Semua Kategori / Jabatan</option>
+                <option value="SP">SP — Sales Project</option>
+                <option value="SR">SR — Sales Reguler</option>
+                <option value="MP">MP — Manager Project</option>
+                <option value="BM">BM — Branch Manager</option>
+                <option value="RKN">RKN — Rekanan</option>
+              </select>
+              <select id="salesDbWaFilter" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                <option value="">Semua Status WA</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tabel Informasi Data Sales yang Sudah Diinput -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-700">Daftar Lengkap Data Sales Terdaftar</span>
+              <span id="salesDbCountLabel" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">0 Data</span>
+            </div>
+            <div class="overflow-x-auto max-h-[520px] overflow-y-auto">
+              <table class="w-full text-left border-collapse">
+                <thead class="sticky top-0 z-10 bg-slate-50 shadow-[0_1px_0_0_#e2e8f0]">
+                  <tr class="border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <th class="py-3 px-4">ID Sales</th>
+                    <th class="py-3 px-4">Kategori / Jabatan</th>
+                    <th class="py-3 px-4">Nama Sales</th>
+                    <th class="py-3 px-4">Wilayah / Area</th>
+                    <th class="py-3 px-4">No. WhatsApp</th>
+                    <th class="py-3 px-4">Beban Kerja &amp; Visit</th>
+                    <th class="py-3 px-4">Status WA</th>
+                    <th class="py-3 px-4 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="salesDbTableBody" class="divide-y divide-slate-100 text-xs"></tbody>
+              </table>
+            </div>
+            <div id="salesDbEmpty" class="hidden p-8 text-center text-xs text-slate-500">
+              Tidak ada data sales yang sesuai filter pencarian.
             </div>
           </div>
         </section>
@@ -786,21 +869,18 @@
 
     function normalizeExcelDate(val, fallback = '') {
       if (val === null || val === undefined || val === '') return fallback;
-      const toLocalYMD = (d) => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      };
+      // Excel Date objects parsed by SheetJS (with cellDates:true) represent local midnight shifted to UTC
+      // Adding +12 hours before reading UTC Y-M-D eliminates all timezone boundary off-by-1-day shifts.
       if (val instanceof Date && !isNaN(val.getTime())) {
-        return toLocalYMD(val);
+        const shifted = new Date(val.getTime() + 12 * 3600 * 1000);
+        return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-${String(shifted.getUTCDate()).padStart(2, '0')}`;
       }
       const str = String(val).trim();
       if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
       if (/^\d{5}(\.\d+)?$/.test(str)) {
         const serial = parseFloat(str);
         if (serial >= 20000 && serial <= 80000) {
-          const utcMs = Math.round((serial - 25569) * 86400 * 1000);
+          const utcMs = Math.round((serial - 25569) * 86400 * 1000 + 12 * 3600 * 1000);
           const d = new Date(utcMs);
           if (!isNaN(d.getTime())) {
             return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
@@ -813,9 +893,27 @@
       }
       if (/GMT[+-]\d{4}|^\w{3}\s+\w{3}\s+\d{1,2}\s+\d{4}/.test(str)) {
         const parsed = new Date(str);
-        if (!isNaN(parsed.getTime())) return toLocalYMD(parsed);
+        if (!isNaN(parsed.getTime())) {
+          const y = parsed.getFullYear();
+          const m = String(parsed.getMonth() + 1).padStart(2, '0');
+          const day = String(parsed.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        }
       }
       return str;
+    }
+
+    function matchesSalesQuery(salesObj, rawQuery) {
+      const q = String(rawQuery || '').trim().toLowerCase();
+      if (!q) return true;
+      if (!salesObj) return false;
+      const comboLabel = `[${salesObj.id}] ${salesObj.nama}`.toLowerCase();
+      return (
+        comboLabel.includes(q) ||
+        salesObj.id.toLowerCase().includes(q) ||
+        salesObj.nama.toLowerCase().includes(q) ||
+        salesObj.area.toLowerCase().includes(q)
+      );
     }
 
     const DEFAULT_DATA = {
@@ -1282,7 +1380,7 @@
 
     function switchTab(tab) {
       activeTab = tab;
-      ['dashboard', 'sirup', 'requests', 'program', 'followup', 'reports'].forEach(t => {
+      ['dashboard', 'sirup', 'requests', 'program', 'followup', 'salesdb', 'reports'].forEach(t => {
         document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
       });
       document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -1297,7 +1395,8 @@
         sirup: ['Peluang Seluruh Pengadaan (SIRUP.INAPROC.ID)', 'Analisa paket RUP instansi pemerintah (Barang, Konstruksi, Konsultansi, Jasa Lainnya) & skor AI.'],
         requests: ['Log Request Tim Sales', 'Kelola permintaan sampel, RAB, surat dukungan, dan persetujuan harga dari sales lapangan.'],
         program: ['Program Pusat (Proposal & Visit KLPD)', 'Buat proposal dari pusat agar sales visit ke relasi KLPD, dan pantau reporting hasil kunjungan via WA.'],
-        followup: ['Follow-Up WA Mingguan Sales', 'Kelola database sales (SP/SR/MP/BM/RKN), pilih topik draf WA, dan catat laporan kunjungan.'],
+        followup: ['Follow-Up WA Mingguan Sales', 'Pilih sales, susun draf pesan WA (jadwal kunjungan atau follow-up hasil visit), dan catat laporan kunjungan.'],
+        salesdb: ['Database Tim Sales & Rekanan', 'Tambah anggota baru (SP/SR/MP/BM/RKN), perbarui data area/WA, dan lihat rekap seluruh data sales yang sudah diinput.'],
         reports: ['Laporan Hasil Kunjungan & Riwayat Database', 'Arsip terstruktur seluruh laporan kunjungan atas Program Pusat dan Request Sales, siap cetak maupun ekspor Excel.']
       };
       document.getElementById('pageTitle').textContent = titles[tab][0];
@@ -1339,6 +1438,8 @@
       document.getElementById('badgePendingReq').textContent = pendingReq;
       document.getElementById('badgePendingProg').textContent = pendingProg;
       document.getElementById('badgePendingWA').textContent = pendingWA;
+      const badgeSales = document.getElementById('badgeTotalSales');
+      if (badgeSales) badgeSales.textContent = state.sales.length;
       document.getElementById('badgeTotalReports').textContent = totalReports;
     }
 
@@ -1907,19 +2008,25 @@
     }
 
     function renderRequests() {
-      const salesSelect = document.getElementById('reqFilterSales');
-      const curSales = salesSelect.value;
-      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
-      salesSelect.value = curSales;
+      const salesInput = document.getElementById('reqFilterSales');
+      const salesDatalist = document.getElementById('reqSalesDatalist');
+      const clearBtn = document.getElementById('btnClearReqSales');
+      if (salesDatalist) {
+        salesDatalist.innerHTML = state.sales.map(s => `<option value="[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}">${escapeHtml(s.area)}</option>`).join('');
+      }
+      const salesQuery = (salesInput?.value || '').trim();
+      if (clearBtn) clearBtn.classList.toggle('hidden', !salesQuery);
 
       const statusSelect = document.getElementById('reqFilterStatus');
       const curStatus = statusSelect.value;
       statusSelect.innerHTML = '<option value="">Semua Status</option>' + buildSelectOptions(MASTER_ENUMS.REQUEST_STATUS, curStatus);
 
-      const fSales = salesSelect.value;
       const fStatus = statusSelect.value;
 
-      const filtered = state.requests.filter(r => (!fSales || r.salesId === fSales) && (!fStatus || r.status === fStatus));
+      const filtered = state.requests.filter(r => {
+        const sls = state.sales.find(s => s.id === r.salesId);
+        return matchesSalesQuery(sls, salesQuery) && (!fStatus || r.status === fStatus);
+      });
       const grid = document.getElementById('requestsGrid');
       const empty = document.getElementById('requestsEmpty');
       grid.innerHTML = '';
@@ -1950,7 +2057,7 @@
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${statusBadge[r.status] || 'bg-slate-100 text-slate-600'}">${escapeHtml(r.status)}</span>
-                <button data-edit-req class="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors" title="Edit Request">
+                <button data-edit-req class="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors" title="Edit / Hapus Request">
                   <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
@@ -2156,6 +2263,119 @@
           </div>
         `).join('')
         : '<p class="text-xs text-slate-400 italic">Belum ada riwayat kunjungan tercatat.</p>';
+    }
+
+    function renderSalesDatabase() {
+      const waSel = document.getElementById('salesDbWaFilter');
+      if (waSel) {
+        const curWa = waSel.value;
+        waSel.innerHTML = '<option value="">Semua Status WA</option>' + buildSelectOptions(MASTER_ENUMS.WA_STATUS, curWa);
+      }
+
+      const summaryEl = document.getElementById('salesDbSummaryCards');
+      if (summaryEl) {
+        const countByPrefix = (pref) => state.sales.filter(s => String(s.id || '').toUpperCase().startsWith(pref + '-')).length;
+        summaryEl.innerHTML = `
+          <div class="bg-slate-900 text-white rounded-xl p-3">
+            <p class="text-[11px] text-slate-300">Total Input Sales</p>
+            <p class="text-xl font-bold mt-0.5 tabular-nums">${state.sales.length}</p>
+          </div>
+          <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3">
+            <p class="text-[11px] text-indigo-700 font-medium">SP (Sales Project)</p>
+            <p class="text-xl font-bold text-indigo-900 mt-0.5 tabular-nums">${countByPrefix('SP')}</p>
+          </div>
+          <div class="bg-sky-50/70 border border-sky-200 rounded-xl p-3">
+            <p class="text-[11px] text-sky-700 font-medium">SR (Sales Reguler)</p>
+            <p class="text-xl font-bold text-sky-900 mt-0.5 tabular-nums">${countByPrefix('SR')}</p>
+          </div>
+          <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-3">
+            <p class="text-[11px] text-amber-700 font-medium">MP (Manager Project)</p>
+            <p class="text-xl font-bold text-amber-900 mt-0.5 tabular-nums">${countByPrefix('MP')}</p>
+          </div>
+          <div class="bg-purple-50/70 border border-purple-200 rounded-xl p-3">
+            <p class="text-[11px] text-purple-700 font-medium">BM (Branch Manager)</p>
+            <p class="text-xl font-bold text-purple-900 mt-0.5 tabular-nums">${countByPrefix('BM')}</p>
+          </div>
+          <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3">
+            <p class="text-[11px] text-emerald-700 font-medium">RKN (Rekanan)</p>
+            <p class="text-xl font-bold text-emerald-900 mt-0.5 tabular-nums">${countByPrefix('RKN')}</p>
+          </div>
+        `;
+      }
+
+      const q = (document.getElementById('salesDbSearch')?.value || '').trim().toLowerCase();
+      const fRole = document.getElementById('salesDbRoleFilter')?.value || '';
+      const fWa = document.getElementById('salesDbWaFilter')?.value || '';
+
+      const filtered = state.sales.filter(s => {
+        const prefix = String(s.id || '').split('-')[0].toUpperCase();
+        const roleLabel = getRoleLabelFromId(s.id, s.jabatan);
+        const matchQ = !q || [s.id, s.nama, s.area, s.wa, roleLabel].join(' ').toLowerCase().includes(q);
+        const matchR = !fRole || prefix === fRole;
+        const matchW = !fWa || s.waStatus === fWa;
+        return matchQ && matchR && matchW;
+      });
+
+      const countLabel = document.getElementById('salesDbCountLabel');
+      if (countLabel) countLabel.textContent = `${filtered.length} dari ${state.sales.length} Data`;
+
+      const tbody = document.getElementById('salesDbTableBody');
+      const empty = document.getElementById('salesDbEmpty');
+      if (!tbody || !empty) return;
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      const waBadge = {
+        'Belum Di-WA': 'bg-slate-100 text-slate-700',
+        'Menunggu Balasan': 'bg-amber-100 text-amber-800',
+        'Sudah Lapor': 'bg-emerald-100 text-emerald-800',
+        'Butuh Eskalasi': 'bg-rose-100 text-rose-800'
+      };
+
+      filtered.forEach(s => {
+        const reqCnt = state.requests.filter(r => r.salesId === s.id).length;
+        const progCnt = (state.programs || []).filter(p => p.salesId === s.id).length;
+        const visitCnt = (s.history || []).length;
+        const roleLabel = getRoleLabelFromId(s.id, s.jabatan);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition-colors';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-indigo-700 whitespace-nowrap">${escapeHtml(s.id)}</td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">${escapeHtml(roleLabel)}</span>
+          </td>
+          <td class="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">${escapeHtml(s.nama)}</td>
+          <td class="py-3 px-4 text-slate-600">${escapeHtml(s.area)}</td>
+          <td class="py-3 px-4 font-mono text-slate-700 whitespace-nowrap">+${escapeHtml(s.wa)}</td>
+          <td class="py-3 px-4 whitespace-nowrap text-[11px] text-slate-600">
+            <span class="font-semibold text-amber-700">${reqCnt} Req</span> •
+            <span class="font-semibold text-sky-700">${progCnt} Prog</span> •
+            <span class="font-semibold text-emerald-700">${visitCnt} Visit</span>
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${waBadge[s.waStatus] || 'bg-slate-100 text-slate-700'}">${escapeHtml(s.waStatus)}</span>
+          </td>
+          <td class="py-3 px-4 text-right whitespace-nowrap space-x-1">
+            <button data-db-wa class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold">WA</button>
+            <button data-db-edit class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold">Edit</button>
+          </td>
+        `;
+        tr.querySelector('[data-db-wa]').addEventListener('click', () => {
+          selectedSalesId = s.id;
+          switchTab('followup');
+        });
+        tr.querySelector('[data-db-edit]').addEventListener('click', () => {
+          selectedSalesId = s.id;
+          openEditSalesModal();
+        });
+        tbody.appendChild(tr);
+      });
     }
 
     function renderReports() {
@@ -3130,7 +3350,7 @@
           Sheet: 'Program_Pusat',
           Nama_Kolom: 'Status_WA_Report',
           Wajib: 'Opsional',
-          Pilihan_Combo_Baku: 'Belum Di-WA | Menunggu Laporan WA | Sudah Lapor Hasil',
+          Pilihan_Combo_Baku: 'Belum Di-WA | Menunggu Balasan | Sudah Lapor | Butuh Eskalasi',
           Keterangan_Pengisian: 'Status pengiriman proposal & pelaporan visit via WhatsApp.'
         },
         {
@@ -3502,14 +3722,14 @@
             if (target === 'auto') {
               wb.SheetNames.forEach(name => {
                 const low = name.toLowerCase();
-                if (low.includes('panduan')) return;
+                if (low.includes('panduan') || low.includes('cara_pengisian')) return;
                 if (low.includes('sales')) {
                   processSales(XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: '' }));
                 }
               });
               wb.SheetNames.forEach(name => {
                 const low = name.toLowerCase();
-                if (low.includes('panduan')) return;
+                if (low.includes('panduan') || low.includes('cara_pengisian')) return;
                 const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: '' });
                 if (low.includes('sirup')) processSirup(rows);
                 else if (low.includes('req')) processRequests(rows);
@@ -3545,18 +3765,24 @@
     }
 
     function renderPrograms() {
-      const salesSelect = document.getElementById('progFilterSales');
-      const curSales = salesSelect.value;
-      salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
-      salesSelect.value = curSales;
+      const salesInput = document.getElementById('progFilterSales');
+      const salesDatalist = document.getElementById('progSalesDatalist');
+      const clearBtn = document.getElementById('btnClearProgSales');
+      if (salesDatalist) {
+        salesDatalist.innerHTML = state.sales.map(s => `<option value="[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}">${escapeHtml(s.area)}</option>`).join('');
+      }
+      const salesQuery = (salesInput?.value || '').trim();
+      if (clearBtn) clearBtn.classList.toggle('hidden', !salesQuery);
 
       const statusSelect = document.getElementById('progFilterStatus');
       const curStatus = statusSelect.value;
       statusSelect.innerHTML = '<option value="">Semua Status</option>' + buildSelectOptions(MASTER_ENUMS.PROGRAM_STATUS, curStatus);
 
-      const fSales = salesSelect.value;
       const fStatus = statusSelect.value;
-      const list = (state.programs || []).filter(p => (!fSales || p.salesId === fSales) && (!fStatus || p.status === fStatus));
+      const list = (state.programs || []).filter(p => {
+        const sls = state.sales.find(s => s.id === p.salesId);
+        return matchesSalesQuery(sls, salesQuery) && (!fStatus || p.status === fStatus);
+      });
 
       const grid = document.getElementById('programsGrid');
       const empty = document.getElementById('programsEmpty');
@@ -3601,6 +3827,9 @@
                   </select>
                 </label>
                 <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${statusColors[p.status] || 'bg-slate-100 text-slate-600'}">${escapeHtml(p.status)}</span>
+                <button data-edit-prog class="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors" title="Edit / Hapus Program Pusat">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
             </div>
             <h4 class="text-sm font-bold text-slate-900 mt-2">${escapeHtml(p.judul)}</h4>
@@ -3634,6 +3863,7 @@
             </div>
           </div>
         `;
+        card.querySelector('[data-edit-prog]').addEventListener('click', () => openEditProgramModal(p));
         card.querySelector('[data-prog-wa-status]').addEventListener('change', (e) => {
           p.waReportStatus = normalizeWaStatus(e.target.value);
           if (sales) sales.waStatus = p.waReportStatus;
@@ -3663,6 +3893,86 @@
         grid.appendChild(card);
       });
       if (window.lucide) lucide.createIcons();
+    }
+
+    function openEditProgramModal(prog) {
+      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === prog.salesId ? 'selected' : ''}>[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
+      const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
+        state.sirup.map(p => `<option value="${escapeHtml(p.id)}" ${prog.sirupId === p.id ? 'selected' : ''}>${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
+
+      openModal(`Edit Program Pusat — ${prog.id}`, `
+        <form id="formEditProgram" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Judul Proposal / Program Pusat</label>
+            <input name="judul" required value="${escapeHtml(prog.judul)}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Relasi KLPD (Pemda/Kementerian)</label>
+              <input name="klpd" required value="${escapeHtml(prog.klpd)}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Satker / Dinas Tujuan</label>
+              <input name="satker" required value="${escapeHtml(prog.satker)}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit</label>
+              <select name="salesId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${salesOpts}</select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Target Tanggal Visit</label>
+              <input name="targetVisit" type="date" required value="${escapeHtml(normalizeExcelDate(prog.targetVisit, getTodayISO()))}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Status Program</label>
+              <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-semibold text-indigo-700">
+                ${buildSelectOptions(MASTER_ENUMS.PROGRAM_STATUS, prog.status)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Opsional)</label>
+            <select name="sirupId" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${pkgOpts}</select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Ringkasan Proposal dari Pusat</label>
+            <textarea name="ringkasanProposal" required rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-300">${escapeHtml(prog.ringkasanProposal)}</textarea>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <button type="button" id="btnDeleteProg" class="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold">Hapus Program</button>
+            <div class="flex gap-2">
+              <button type="button" id="cancelModalBtn" class="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold">Batal</button>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">Simpan Perubahan</button>
+            </div>
+          </div>
+        </form>
+      `);
+      document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+      document.getElementById('btnDeleteProg').addEventListener('click', () => {
+        state.programs = (state.programs || []).filter(x => x.id !== prog.id);
+        saveState();
+        closeModal();
+        renderAll();
+        showToast(`Program Pusat ${prog.id} dihapus.`, 'info');
+      });
+      document.getElementById('formEditProgram').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        prog.judul = fd.get('judul').trim();
+        prog.klpd = fd.get('klpd').trim();
+        prog.satker = fd.get('satker').trim();
+        prog.salesId = fd.get('salesId');
+        prog.targetVisit = fd.get('targetVisit');
+        prog.sirupId = fd.get('sirupId');
+        prog.ringkasanProposal = fd.get('ringkasanProposal').trim();
+        syncProgramStatusChange(prog, fd.get('status'));
+        saveState();
+        closeModal();
+        renderAll();
+        showToast(`Program Pusat ${prog.id} berhasil diperbarui.`, 'success');
+      });
     }
 
     function openAddProgramModal() {
@@ -3817,6 +4127,7 @@
       if (activeTab === 'requests') renderRequests();
       if (activeTab === 'program') renderPrograms();
       if (activeTab === 'followup') renderFollowUp();
+      if (activeTab === 'salesdb') renderSalesDatabase();
       if (activeTab === 'reports') renderReports();
       if (window.lucide) lucide.createIcons();
     }
@@ -3873,14 +4184,20 @@
     document.getElementById('btnAddSirup').addEventListener('click', openAddSirupModal);
     document.getElementById('btnImportSirup').addEventListener('click', openImportSirupModal);
 
-    ['reqFilterSales', 'reqFilterStatus'].forEach(id => {
-      document.getElementById(id).addEventListener('change', renderRequests);
+    document.getElementById('reqFilterSales').addEventListener('input', renderRequests);
+    document.getElementById('btnClearReqSales')?.addEventListener('click', () => {
+      document.getElementById('reqFilterSales').value = '';
+      renderRequests();
     });
+    document.getElementById('reqFilterStatus').addEventListener('change', renderRequests);
     document.getElementById('btnAddRequest').addEventListener('click', () => openAddRequestModal());
 
-    ['progFilterSales', 'progFilterStatus'].forEach(id => {
-      document.getElementById(id).addEventListener('change', renderPrograms);
+    document.getElementById('progFilterSales').addEventListener('input', renderPrograms);
+    document.getElementById('btnClearProgSales')?.addEventListener('click', () => {
+      document.getElementById('progFilterSales').value = '';
+      renderPrograms();
     });
+    document.getElementById('progFilterStatus').addEventListener('change', renderPrograms);
     document.getElementById('btnAddProgram').addEventListener('click', openAddProgramModal);
 
     document.getElementById('waFilterStatus').addEventListener('change', renderFollowUp);
@@ -3919,9 +4236,14 @@
 
     document.getElementById('btnLogVisitResult').addEventListener('click', openLogVisitModal);
     document.getElementById('btnViewAllReports').addEventListener('click', () => switchTab('reports'));
+    document.getElementById('btnGoSalesDb')?.addEventListener('click', () => switchTab('salesdb'));
     document.getElementById('btnAddSales').addEventListener('click', openAddSalesModal);
     document.getElementById('btnEditSales').addEventListener('click', openEditSalesModal);
     document.getElementById('btnExportWeekly').addEventListener('click', exportWeeklyCsv);
+
+    ['salesDbSearch', 'salesDbRoleFilter', 'salesDbWaFilter'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', renderSalesDatabase);
+    });
 
     ['repSearch', 'repFilterSales', 'repFilterSource', 'repFilterHasil'].forEach(id => {
       document.getElementById(id).addEventListener('input', renderReports);
