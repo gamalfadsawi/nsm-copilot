@@ -903,6 +903,96 @@
       return str;
     }
 
+    function sanitizeAllDatesInText(val) {
+      if (val instanceof Date && !isNaN(val.getTime())) {
+        return normalizeExcelDate(val, '');
+      }
+      let str = String(val ?? '').trim();
+      if (!str) return '';
+      if (/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+[A-Za-z]{3}\s+\d{1,2}\s+\d{4}/.test(str) || /GMT[+-]\d{4}/.test(str)) {
+        return normalizeExcelDate(str, str);
+      }
+      return str.replace(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+[A-Za-z]{3}\s+\d{1,2}\s+\d{4}(?:\s+\d{2}:\d{2}:\d{2}\s+GMT[+-]\d{4}(?:\s*\([^)]*\))?)?/g, (match) => {
+        return normalizeExcelDate(match, match);
+      });
+    }
+
+    function buildSalesPickerHtml(inputName, selectedSalesId = '', required = true) {
+      const listId = 'dl_sales_' + Math.random().toString(36).slice(2, 8);
+      const selObj = state.sales.find(s => s.id === selectedSalesId) || (required ? state.sales[0] : null);
+      const initialVal = selObj ? `[${selObj.id}] ${selObj.nama}` : '';
+      const opts = state.sales.map(s => `<option value="[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}">${escapeHtml(getRoleLabelFromId(s.id, s.jabatan))} • ${escapeHtml(s.area)}</option>`).join('');
+      return `
+        <div class="relative">
+          <input type="text" list="${listId}" data-sales-picker="${escapeHtml(inputName)}" value="${escapeHtml(initialVal)}" ${required ? 'required' : ''} autocomplete="off" placeholder="Ketik ID atau nama sales..." class="w-full px-3 py-2 pr-7 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <datalist id="${listId}">${opts}</datalist>
+          <input type="hidden" name="${escapeHtml(inputName)}" value="${escapeHtml(selObj ? selObj.id : '')}" />
+        </div>
+      `;
+    }
+
+    function buildSirupPickerHtml(inputName, selectedSirupId = '') {
+      const listId = 'dl_sirup_' + Math.random().toString(36).slice(2, 8);
+      const selObj = state.sirup.find(p => p.id === selectedSirupId);
+      const initialVal = selObj ? `${selObj.id} — ${selObj.klpd}` : (selectedSirupId || '');
+      const opts = state.sirup.map(p => `<option value="${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}">${escapeHtml(p.namaPaket)}</option>`).join('');
+      return `
+        <div class="relative">
+          <input type="text" list="${listId}" data-sirup-picker="${escapeHtml(inputName)}" value="${escapeHtml(initialVal)}" autocomplete="off" placeholder="Ketik kode RUP, KLPD, atau nama paket..." class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <datalist id="${listId}">${opts}</datalist>
+          <input type="hidden" name="${escapeHtml(inputName)}" value="${escapeHtml(selObj ? selObj.id : selectedSirupId)}" />
+        </div>
+      `;
+    }
+
+    function resolveSalesIdFromInputText(rawText) {
+      const txt = String(rawText || '').trim();
+      if (!txt) return '';
+      const bracketMatch = txt.match(/^\[([^\]]+)\]/);
+      if (bracketMatch) {
+        const found = state.sales.find(s => s.id.toUpperCase() === bracketMatch[1].trim().toUpperCase());
+        if (found) return found.id;
+      }
+      const exactId = state.sales.find(s => s.id.toUpperCase() === txt.toUpperCase());
+      if (exactId) return exactId.id;
+      const exactName = state.sales.find(s => s.nama.toLowerCase() === txt.toLowerCase());
+      if (exactName) return exactName.id;
+      const partial = state.sales.find(s => `[${s.id}] ${s.nama}`.toLowerCase().includes(txt.toLowerCase()) || s.nama.toLowerCase().includes(txt.toLowerCase()));
+      return partial ? partial.id : '';
+    }
+
+    function resolveSirupIdFromInputText(rawText) {
+      const txt = String(rawText || '').trim();
+      if (!txt) return '';
+      const dashSplit = txt.split('—')[0].trim();
+      const found = state.sirup.find(p => p.id.toUpperCase() === dashSplit.toUpperCase() || p.id.toUpperCase() === txt.toUpperCase());
+      if (found) return found.id;
+      const partial = state.sirup.find(p => `${p.id} — ${p.klpd} ${p.namaPaket}`.toLowerCase().includes(txt.toLowerCase()));
+      return partial ? partial.id : dashSplit;
+    }
+
+    function bindModalSearchPickers(formEl) {
+      if (!formEl) return;
+      formEl.querySelectorAll('[data-sales-picker]').forEach(visibleInput => {
+        const hiddenName = visibleInput.dataset.salesPicker;
+        const hiddenInput = formEl.querySelector(`input[type="hidden"][name="${hiddenName}"]`);
+        const syncVal = () => {
+          if (hiddenInput) hiddenInput.value = resolveSalesIdFromInputText(visibleInput.value);
+        };
+        visibleInput.addEventListener('input', syncVal);
+        visibleInput.addEventListener('change', syncVal);
+      });
+      formEl.querySelectorAll('[data-sirup-picker]').forEach(visibleInput => {
+        const hiddenName = visibleInput.dataset.sirupPicker;
+        const hiddenInput = formEl.querySelector(`input[type="hidden"][name="${hiddenName}"]`);
+        const syncVal = () => {
+          if (hiddenInput) hiddenInput.value = resolveSirupIdFromInputText(visibleInput.value);
+        };
+        visibleInput.addEventListener('input', syncVal);
+        visibleInput.addEventListener('change', syncVal);
+      });
+    }
+
     function matchesSalesQuery(salesObj, rawQuery) {
       const q = String(rawQuery || '').trim().toLowerCase();
       if (!q) return true;
@@ -1179,7 +1269,7 @@
           return {
             id: cleanId,
             jenis: matchEnum(p.jenis, MASTER_ENUMS.SIRUP_JENIS, 'Barang'),
-            namaPaket: String(p.namaPaket || '').trim(),
+            namaPaket: sanitizeAllDatesInText(p.namaPaket || ''),
             klpd: String(p.klpd || '').trim(),
             satker: String(p.satker || '').trim(),
             pagu: Number(p.pagu) || 0,
@@ -1188,7 +1278,7 @@
             jadwal: normalizeExcelDate(p.jadwal, '-'),
             status: matchEnum(p.status, MASTER_ENUMS.SIRUP_STATUS, 'Peluang Baru'),
             linkSirup: getSirupDetailUrl(cleanId, p.linkSirup),
-            notes: String(p.notes || '').trim()
+            notes: sanitizeAllDatesInText(p.notes || '')
           };
         });
         parsed.sales = parsed.sales.map(s => {
@@ -1200,16 +1290,16 @@
             area: String(s.area || '-').trim(),
             wa: normalizePhone(s.wa),
             waStatus: normalizeWaStatus(s.waStatus),
-            lastWaSent: String(s.lastWaSent || '-').trim(),
+            lastWaSent: sanitizeAllDatesInText(s.lastWaSent || '-'),
             history: Array.isArray(s.history) ? s.history.map((h, idx) => ({
               id: String(h.id || `LAP-${100 + idx}`).trim(),
               tanggal: normalizeExcelDate(h.tanggal, getTodayISO()),
               sumberJenis: String(h.sumberJenis || (h.refId && String(h.refId).startsWith('PRG') ? 'Program Pusat' : h.refId && String(h.refId).startsWith('REQ') ? 'Request Sales' : 'Kunjungan Umum')).trim(),
               refId: String(h.refId || '-').trim(),
-              judulProgram: String(h.judulProgram || h.instansi || '-').trim(),
+              judulProgram: sanitizeAllDatesInText(h.judulProgram || h.instansi || '-'),
               instansi: String(h.instansi || '-').trim(),
               hasil: matchEnum(h.hasil, MASTER_ENUMS.VISIT_HASIL, 'Menunggu Anggaran'),
-              ringkasan: String(h.ringkasan || '-').trim()
+              ringkasan: sanitizeAllDatesInText(h.ringkasan || '-')
             })) : []
           };
         });
@@ -1218,7 +1308,7 @@
           salesId: String(r.salesId || '').trim(),
           instansi: String(r.instansi || '').trim(),
           kategori: matchEnum(r.kategori, MASTER_ENUMS.REQUEST_KATEGORI, 'Sampel Buku & Daftar Harga'),
-          detail: String(r.detail || '').trim(),
+          detail: sanitizeAllDatesInText(r.detail || ''),
           prioritas: matchEnum(r.prioritas, MASTER_ENUMS.REQUEST_PRIORITAS, 'Sedang'),
           deadline: normalizeExcelDate(r.deadline, getTodayISO()),
           status: matchEnum(r.status, MASTER_ENUMS.REQUEST_STATUS, 'Baru'),
@@ -1227,16 +1317,16 @@
         }));
         parsed.programs = parsed.programs.map(p => ({
           id: String(p.id || '').trim() || ('PRG-' + Math.floor(200 + Math.random() * 800)),
-          judul: String(p.judul || '').trim(),
+          judul: sanitizeAllDatesInText(p.judul || ''),
           klpd: String(p.klpd || '').trim(),
           satker: String(p.satker || '').trim(),
           sirupId: String(p.sirupId || '').trim(),
           salesId: String(p.salesId || '').trim(),
-          ringkasanProposal: String(p.ringkasanProposal || '').trim(),
+          ringkasanProposal: sanitizeAllDatesInText(p.ringkasanProposal || ''),
           targetVisit: normalizeExcelDate(p.targetVisit, getTodayISO()),
           status: matchEnum(p.status, MASTER_ENUMS.PROGRAM_STATUS, 'Siap Visit'),
           waReportStatus: normalizeWaStatus(p.waReportStatus),
-          hasilKunjungan: String(p.hasilKunjungan || '').trim()
+          hasilKunjungan: sanitizeAllDatesInText(p.hasilKunjungan || '')
         }));
         if (!Array.isArray(parsed.completedDailyTasks)) {
           parsed.completedDailyTasks = [];
@@ -2477,15 +2567,11 @@
     }
 
     function openAddRequestModal(prefillPkg = null) {
-      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
-      const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
-        state.sirup.map(p => `<option value="${escapeHtml(p.id)}" ${prefillPkg && prefillPkg.id === p.id ? 'selected' : ''}>${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
-
       openModal('Catat Permintaan / Request Sales', `
         <form id="formAddRequest" class="space-y-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Nama Sales</label>
-            <select name="salesId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${salesOpts}</select>
+            <label class="block font-semibold text-slate-700 mb-1">Nama Sales (Ketik ID / Nama)</label>
+            ${buildSalesPickerHtml('salesId', state.sales[0]?.id || '', true)}
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Instansi / Dinas / Sekolah Tujuan</label>
@@ -2524,8 +2610,8 @@
               <input name="deadline" type="date" required value="${getTodayISO()}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP</label>
-              <select name="sirupId" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${pkgOpts}</select>
+              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+              ${buildSirupPickerHtml('sirupId', prefillPkg ? prefillPkg.id : '')}
             </div>
           </div>
           <div class="pt-2 flex justify-end gap-2">
@@ -2535,20 +2621,27 @@
         </form>
       `);
 
+      const formAddReq = document.getElementById('formAddRequest');
+      bindModalSearchPickers(formAddReq);
       document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
-      document.getElementById('formAddRequest').addEventListener('submit', (e) => {
+      formAddReq.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
+        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formAddReq.querySelector('[data-sales-picker]')?.value);
+        if (!resolvedSales) {
+          showToast('Pilih Nama Sales yang valid dari daftar.', 'error');
+          return;
+        }
         const newReq = {
           id: 'REQ-' + Math.floor(100 + Math.random() * 900),
-          salesId: fd.get('salesId'),
+          salesId: resolvedSales,
           instansi: fd.get('instansi').trim(),
           kategori: fd.get('kategori'),
           detail: fd.get('detail').trim(),
           prioritas: fd.get('prioritas'),
           deadline: fd.get('deadline'),
           status: 'Baru',
-          sirupId: fd.get('sirupId'),
+          sirupId: fd.get('sirupId') || resolveSirupIdFromInputText(formAddReq.querySelector('[data-sirup-picker]')?.value),
           createdAt: getTodayISO()
         };
         syncRequestStatusChange(newReq, fd.get('status') || 'Baru');
@@ -2561,15 +2654,11 @@
     }
 
     function openEditRequestModal(req) {
-      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === req.salesId ? 'selected' : ''}>[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
-      const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
-        state.sirup.map(p => `<option value="${escapeHtml(p.id)}" ${req.sirupId === p.id ? 'selected' : ''}>${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
-
       openModal(`Edit Request Sales — ${req.id}`, `
         <form id="formEditRequest" class="space-y-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Nama Sales</label>
-            <select name="salesId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${salesOpts}</select>
+            <label class="block font-semibold text-slate-700 mb-1">Nama Sales (Ketik ID / Nama)</label>
+            ${buildSalesPickerHtml('salesId', req.salesId, true)}
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Instansi / Dinas / Sekolah Tujuan</label>
@@ -2605,8 +2694,8 @@
               <input name="deadline" type="date" required value="${escapeHtml(normalizeExcelDate(req.deadline, getTodayISO()))}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
             </div>
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP</label>
-              <select name="sirupId" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${pkgOpts}</select>
+              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+              ${buildSirupPickerHtml('sirupId', req.sirupId)}
             </div>
           </div>
           <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
@@ -2618,6 +2707,8 @@
           </div>
         </form>
       `);
+      const formEditReq = document.getElementById('formEditRequest');
+      bindModalSearchPickers(formEditReq);
       document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
       document.getElementById('btnDeleteReq').addEventListener('click', () => {
         state.requests = state.requests.filter(x => x.id !== req.id);
@@ -2626,16 +2717,21 @@
         renderAll();
         showToast(`Request ${req.id} dihapus.`, 'info');
       });
-      document.getElementById('formEditRequest').addEventListener('submit', (e) => {
+      formEditReq.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        req.salesId = fd.get('salesId');
+        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formEditReq.querySelector('[data-sales-picker]')?.value);
+        if (!resolvedSales) {
+          showToast('Pilih Nama Sales yang valid dari daftar.', 'error');
+          return;
+        }
+        req.salesId = resolvedSales;
         req.instansi = fd.get('instansi').trim();
         req.kategori = fd.get('kategori');
         req.prioritas = fd.get('prioritas');
         req.detail = fd.get('detail').trim();
         req.deadline = fd.get('deadline');
-        req.sirupId = fd.get('sirupId');
+        req.sirupId = fd.get('sirupId') || resolveSirupIdFromInputText(formEditReq.querySelector('[data-sirup-picker]')?.value);
         syncRequestStatusChange(req, fd.get('status'));
         saveState();
         closeModal();
@@ -3577,7 +3673,7 @@
                 return {
                   id: cleanId,
                   jenis: matchEnum(r.Jenis_Pengadaan || r.jenis, MASTER_ENUMS.SIRUP_JENIS, 'Barang'),
-                  namaPaket: String(r.Nama_Paket || r.namaPaket || 'Paket Pengadaan').trim(),
+                  namaPaket: sanitizeAllDatesInText(r.Nama_Paket || r.namaPaket || 'Paket Pengadaan'),
                   klpd: String(r.KLPD || r.klpd || 'Pemda').trim(),
                   satker: String(r.Satker || r.satker || 'Dinas Terkait').trim(),
                   pagu: Number(String(r.Pagu_Rp || r.pagu || 0).replace(/[^\d]/g, '')) || 0,
@@ -3586,7 +3682,7 @@
                   jadwal: normalizeExcelDate(r.Jadwal_Pemilihan ?? r.jadwal, getTodayISO()),
                   status: matchEnum(r.Status || r.status, MASTER_ENUMS.SIRUP_STATUS, 'Peluang Baru'),
                   linkSirup: getSirupDetailUrl(cleanId, r.Link_SIRUP || r.linkSirup || ''),
-                  notes: String(r.Catatan || r.notes || 'Diimpor dari Excel').trim()
+                  notes: sanitizeAllDatesInText(r.Catatan || r.notes || 'Diimpor dari Excel')
                 };
               }).filter(x => x.namaPaket);
               if (mode === 'replace' && mapped.length) state.sirup = mapped;
@@ -3641,7 +3737,7 @@
                   salesId: sId,
                   instansi: String(r.Instansi_Tujuan || r.instansi || '').trim(),
                   kategori: matchEnum(r.Kategori_Request || r.kategori, MASTER_ENUMS.REQUEST_KATEGORI, 'Sampel Buku & Daftar Harga'),
-                  detail: String(r.Detail_Kebutuhan || r.detail || '-').trim(),
+                  detail: sanitizeAllDatesInText(r.Detail_Kebutuhan || r.detail || '-'),
                   prioritas: matchEnum(r.Prioritas || r.prioritas, MASTER_ENUMS.REQUEST_PRIORITAS, 'Sedang'),
                   deadline: normalizeExcelDate(r.Deadline ?? r.deadline, getTodayISO()),
                   status: 'Baru',
@@ -3663,18 +3759,25 @@
             const processPrograms = (rows) => {
               if (!Array.isArray(state.programs)) state.programs = [];
               const mapped = rows.map(r => {
+                let rawSalesId = r.ID_Sales || r.salesId || '';
+                let rawSirupId = String(r.Kode_RUP || r.sirupId || '').trim();
+                // Auto-fix if user shifted Kode_RUP & ID_Sales columns in Excel
+                if (!rawSalesId && /^(SP|SR|MP|BM|RKN|SLS)-\d+/i.test(rawSirupId)) {
+                  rawSalesId = rawSirupId;
+                  rawSirupId = '';
+                }
                 const progObj = {
                   id: String(r.ID_Program || r.id || ('PRG-' + Math.floor(200 + Math.random() * 800))).trim(),
-                  judul: String(r.Judul_Proposal || r.judul || '').trim(),
+                  judul: sanitizeAllDatesInText(r.Judul_Proposal || r.judul || ''),
                   klpd: String(r.KLPD || r.klpd || 'Pemda').trim(),
                   satker: String(r.Satker || r.satker || 'Dinas Terkait').trim(),
-                  sirupId: String(r.Kode_RUP || r.sirupId || '').trim(),
-                  salesId: resolveSalesId(r.ID_Sales || r.salesId, r.Nama_Sales),
-                  ringkasanProposal: String(r.Ringkasan_Proposal || r.ringkasanProposal || '-').trim(),
+                  sirupId: rawSirupId,
+                  salesId: resolveSalesId(rawSalesId, r.Nama_Sales),
+                  ringkasanProposal: sanitizeAllDatesInText(r.Ringkasan_Proposal || r.ringkasanProposal || '-'),
                   targetVisit: normalizeExcelDate(r.Target_Visit ?? r.targetVisit, getTodayISO()),
                   status: 'Siap Visit',
                   waReportStatus: normalizeWaStatus(r.Status_WA_Report || r.waReportStatus),
-                  hasilKunjungan: String(r.Hasil_Kunjungan || r.hasilKunjungan || '').trim()
+                  hasilKunjungan: sanitizeAllDatesInText(r.Hasil_Kunjungan || r.hasilKunjungan || '')
                 };
                 syncProgramStatusChange(progObj, r.Status || r.status || 'Siap Visit');
                 if (r.Status_WA_Report || r.waReportStatus) {
@@ -3878,16 +3981,28 @@
           showToast(`Status ${p.id} diperbarui ke "${p.status}" & tersinkron.`, 'success');
         });
         card.querySelector('[data-action="wa"]').addEventListener('click', () => {
-          if (!sales) return;
-          const msg = `Halo ${sales.nama}, tim Pusat sudah menyiapkan proposal *${p.judul}* untuk relasi KLPD *${p.klpd} (${p.satker})*.\n\nPoin Proposal:\n${p.ringkasanProposal}\n\nTarget visit: *${p.targetVisit}*. Mohon koordinasikan kunjungan dan laporkan hasil follow-up visit via WhatsApp ini ya. Terima kasih!`;
+          const targetSales = sales || state.sales.find(s => s.id.toUpperCase() === String(p.sirupId || '').toUpperCase());
+          if (!targetSales) {
+            showToast(`Sales Visit untuk ${p.id} belum dipilih. Klik ikon pensil (Edit) untuk memilih sales.`, 'error');
+            openEditProgramModal(p);
+            return;
+          }
+          if (!targetSales.wa) {
+            showToast(`Nomor WhatsApp ${targetSales.nama} belum diisi di Database Sales.`, 'error');
+            return;
+          }
+          if (!sales && targetSales) {
+            p.salesId = targetSales.id;
+          }
+          const msg = `Halo ${targetSales.nama}, tim Pusat sudah menyiapkan proposal *${p.judul}* untuk relasi KLPD *${p.klpd} (${p.satker})*.\n\nPoin Proposal:\n${p.ringkasanProposal}\n\nTarget visit: *${p.targetVisit}*. Mohon koordinasikan kunjungan dan laporkan hasil follow-up visit via WhatsApp ini ya. Terima kasih!`;
           p.waReportStatus = 'Menunggu Balasan';
           if (p.status === 'Draft Pusat') syncProgramStatusChange(p, 'Siap Visit');
-          sales.waStatus = 'Menunggu Balasan';
-          sales.lastWaSent = new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+          targetSales.waStatus = 'Menunggu Balasan';
+          targetSales.lastWaSent = new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
           saveState();
           renderAll();
-          window.open(`https://wa.me/${sales.wa}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
-          showToast(`Instruksi proposal dikirim ke WA ${sales.nama}.`, 'success');
+          window.open(`https://wa.me/${targetSales.wa}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+          showToast(`Instruksi proposal dikirim ke WA ${targetSales.nama}.`, 'success');
         });
         card.querySelector('[data-action="report"]').addEventListener('click', () => openReportProgramModal(p));
         grid.appendChild(card);
@@ -3896,10 +4011,6 @@
     }
 
     function openEditProgramModal(prog) {
-      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === prog.salesId ? 'selected' : ''}>[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
-      const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
-        state.sirup.map(p => `<option value="${escapeHtml(p.id)}" ${prog.sirupId === p.id ? 'selected' : ''}>${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
-
       openModal(`Edit Program Pusat — ${prog.id}`, `
         <form id="formEditProgram" class="space-y-3 text-xs">
           <div>
@@ -3918,8 +4029,8 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit</label>
-              <select name="salesId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${salesOpts}</select>
+              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit (Ketik)</label>
+              ${buildSalesPickerHtml('salesId', prog.salesId, true)}
             </div>
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Target Tanggal Visit</label>
@@ -3933,8 +4044,8 @@
             </div>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Opsional)</label>
-            <select name="sirupId" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${pkgOpts}</select>
+            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+            ${buildSirupPickerHtml('sirupId', prog.sirupId)}
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Ringkasan Proposal dari Pusat</label>
@@ -3949,6 +4060,8 @@
           </div>
         </form>
       `);
+      const formEditProg = document.getElementById('formEditProgram');
+      bindModalSearchPickers(formEditProg);
       document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
       document.getElementById('btnDeleteProg').addEventListener('click', () => {
         state.programs = (state.programs || []).filter(x => x.id !== prog.id);
@@ -3957,15 +4070,20 @@
         renderAll();
         showToast(`Program Pusat ${prog.id} dihapus.`, 'info');
       });
-      document.getElementById('formEditProgram').addEventListener('submit', (e) => {
+      formEditProg.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
+        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formEditProg.querySelector('[data-sales-picker]')?.value);
+        if (!resolvedSales) {
+          showToast('Pilih Sales Visit yang valid dari daftar.', 'error');
+          return;
+        }
         prog.judul = fd.get('judul').trim();
         prog.klpd = fd.get('klpd').trim();
         prog.satker = fd.get('satker').trim();
-        prog.salesId = fd.get('salesId');
+        prog.salesId = resolvedSales;
         prog.targetVisit = fd.get('targetVisit');
-        prog.sirupId = fd.get('sirupId');
+        prog.sirupId = fd.get('sirupId') || resolveSirupIdFromInputText(formEditProg.querySelector('[data-sirup-picker]')?.value);
         prog.ringkasanProposal = fd.get('ringkasanProposal').trim();
         syncProgramStatusChange(prog, fd.get('status'));
         saveState();
@@ -3976,10 +4094,6 @@
     }
 
     function openAddProgramModal() {
-      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
-      const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
-        state.sirup.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
-
       openModal('Buat Proposal Program Pusat untuk Visit KLPD', `
         <form id="formAddProgram" class="space-y-3 text-xs">
           <div>
@@ -3998,8 +4112,8 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit</label>
-              <select name="salesId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${salesOpts}</select>
+              <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit (Ketik)</label>
+              ${buildSalesPickerHtml('salesId', state.sales[0]?.id || '', true)}
             </div>
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Target Tanggal Visit</label>
@@ -4013,8 +4127,8 @@
             </div>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Opsional)</label>
-            <select name="sirupId" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${pkgOpts}</select>
+            <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP (Ketik Kode/KLPD)</label>
+            ${buildSirupPickerHtml('sirupId', '')}
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Ringkasan Proposal dari Pusat</label>
@@ -4026,17 +4140,24 @@
           </div>
         </form>
       `);
+      const formAddProg = document.getElementById('formAddProgram');
+      bindModalSearchPickers(formAddProg);
       document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
-      document.getElementById('formAddProgram').addEventListener('submit', (e) => {
+      formAddProg.addEventListener('submit', (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
+        const resolvedSales = fd.get('salesId') || resolveSalesIdFromInputText(formAddProg.querySelector('[data-sales-picker]')?.value);
+        if (!resolvedSales) {
+          showToast('Pilih Sales Visit yang valid dari daftar.', 'error');
+          return;
+        }
         const newProg = {
           id: 'PRG-' + Math.floor(200 + Math.random() * 800),
           judul: fd.get('judul').trim(),
           klpd: fd.get('klpd').trim(),
           satker: fd.get('satker').trim(),
-          sirupId: fd.get('sirupId'),
-          salesId: fd.get('salesId'),
+          sirupId: fd.get('sirupId') || resolveSirupIdFromInputText(formAddProg.querySelector('[data-sirup-picker]')?.value),
+          salesId: resolvedSales,
           ringkasanProposal: fd.get('ringkasanProposal').trim(),
           targetVisit: fd.get('targetVisit'),
           status: 'Siap Visit',
