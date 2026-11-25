@@ -619,7 +619,7 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 class="text-sm font-bold text-slate-900">Database Tim Sales, Manager &amp; Rekanan</h3>
-                <p class="text-xs text-slate-500">Tambah anggota baru (auto-generate ID SP/SR/MP/BM/RKN), lihat rekap data sales yang sudah diinput, dan pantau beban kerja tiap anggota.</p>
+                <p class="text-xs text-slate-500">Tambah anggota baru (auto-generate ID SP/SR/MP/AM/BM/RKN), lihat rekap data sales yang sudah diinput, dan pantau beban kerja tiap anggota.</p>
               </div>
               <div class="flex flex-wrap items-center gap-2">
                 <button id="btnAddSales" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors">
@@ -630,7 +630,7 @@
             </div>
 
             <!-- Ringkasan Data Sales yang Sudah Diinput -->
-            <div id="salesDbSummaryCards" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+            <div id="salesDbSummaryCards" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3"></div>
 
             <!-- Filter Bar -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -643,6 +643,7 @@
                 <option value="SP">SP — Sales Project</option>
                 <option value="SR">SR — Sales Reguler</option>
                 <option value="MP">MP — Manager Project</option>
+                <option value="AM">AM — Area Manager</option>
                 <option value="BM">BM — Branch Manager</option>
                 <option value="RKN">RKN — Rekanan</option>
               </select>
@@ -823,6 +824,7 @@
       SP: 'Sales Project',
       SR: 'Sales Reguler',
       MP: 'Manager Project',
+      AM: 'Area Manager',
       BM: 'Branch Manager',
       RKN: 'Rekanan'
     };
@@ -2382,6 +2384,10 @@
             <p class="text-[11px] text-amber-700 font-medium">MP (Manager Project)</p>
             <p class="text-xl font-bold text-amber-900 mt-0.5 tabular-nums">${countByPrefix('MP')}</p>
           </div>
+          <div class="bg-rose-50/70 border border-rose-200 rounded-xl p-3">
+            <p class="text-[11px] text-rose-700 font-medium">AM (Area Manager)</p>
+            <p class="text-xl font-bold text-rose-900 mt-0.5 tabular-nums">${countByPrefix('AM')}</p>
+          </div>
           <div class="bg-purple-50/70 border border-purple-200 rounded-xl p-3">
             <p class="text-[11px] text-purple-700 font-medium">BM (Branch Manager)</p>
             <p class="text-xl font-bold text-purple-900 mt-0.5 tabular-nums">${countByPrefix('BM')}</p>
@@ -3249,7 +3255,7 @@
         { Sheet: 'SIRUP', Kolom: 'Metode_Pemilihan', Pilihan_Combo_Baku: MASTER_ENUMS.SIRUP_METODE.join(' | '), Keterangan: 'Metode pengadaan di SIRUP INAPROC' },
         { Sheet: 'SIRUP', Kolom: 'Sumber_Dana', Pilihan_Combo_Baku: MASTER_ENUMS.SIRUP_DANA.join(' | '), Keterangan: 'Sumber anggaran paket pengadaan' },
         { Sheet: 'SIRUP', Kolom: 'Status', Pilihan_Combo_Baku: MASTER_ENUMS.SIRUP_STATUS.join(' | '), Keterangan: 'Status tindak lanjut paket SIRUP' },
-        { Sheet: 'Sales', Kolom: 'ID_Sales (Prefix)', Pilihan_Combo_Baku: 'SP-01 (Sales Project) | SR-01 (Sales Reguler) | MP-01 (Manager Project) | BM-01 (Branch Manager) | RKN-01 (Rekanan)', Keterangan: 'Gunakan awalan kode peran yang sesuai' },
+        { Sheet: 'Sales', Kolom: 'ID_Sales (Prefix)', Pilihan_Combo_Baku: 'SP-01 (Sales Project) | SR-01 (Sales Reguler) | MP-01 (Manager Project) | AM-01 (Area Manager) | BM-01 (Branch Manager) | RKN-01 (Rekanan)', Keterangan: 'Gunakan awalan kode peran yang sesuai' },
         { Sheet: 'Sales', Kolom: 'Status_WA', Pilihan_Combo_Baku: MASTER_ENUMS.WA_STATUS.join(' | '), Keterangan: 'Status follow-up WA mingguan sales' },
         { Sheet: 'Request', Kolom: 'Kategori_Request', Pilihan_Combo_Baku: MASTER_ENUMS.REQUEST_KATEGORI.join(' | '), Keterangan: 'Jenis kebutuhan yang diminta sales' },
         { Sheet: 'Request', Kolom: 'Prioritas', Pilihan_Combo_Baku: MASTER_ENUMS.REQUEST_PRIORITAS.join(' | '), Keterangan: 'Tinggi akan masuk Task Prioritas Harian' },
@@ -3397,8 +3403,8 @@
           Sheet: 'Sales',
           Nama_Kolom: 'Kategori_Jabatan & ID_Sales',
           Wajib: 'Wajib',
-          Pilihan_Combo_Baku: 'SP-... (Sales Project) | SR-... (Sales Reguler) | MP-... (Manager Project) | BM-... (Branch Manager) | RKN-... (Rekanan)',
-          Keterangan_Pengisian: 'Gunakan awalan kode SP/SR/MP/BM/RKN diikuti nomor urut (contoh: SP-01, SR-02).'
+          Pilihan_Combo_Baku: 'SP-... (Sales Project) | SR-... (Sales Reguler) | MP-... (Manager Project) | AM-... (Area Manager) | BM-... (Branch Manager) | RKN-... (Rekanan)',
+          Keterangan_Pengisian: 'Gunakan awalan kode SP/SR/MP/AM/BM/RKN diikuti nomor urut (contoh: SP-01, AM-01).'
         },
         {
           Sheet: 'Sales',
@@ -3505,6 +3511,14 @@
           Nama_Sales: 'Andi Pratama',
           Wilayah_Area: 'Semarang & Pantura',
           No_WhatsApp: '6281511223344',
+          Status_WA: 'Belum Di-WA'
+        },
+        {
+          ID_Sales: 'AM-01',
+          Kategori_Jabatan: 'Area Manager',
+          Nama_Sales: 'Hendra Wijaya',
+          Wilayah_Area: 'Jawa Tengah & DIY',
+          No_WhatsApp: '6281677889900',
           Status_WA: 'Belum Di-WA'
         },
         {
@@ -3762,7 +3776,7 @@
                 let rawSalesId = r.ID_Sales || r.salesId || '';
                 let rawSirupId = String(r.Kode_RUP || r.sirupId || '').trim();
                 // Auto-fix if user shifted Kode_RUP & ID_Sales columns in Excel
-                if (!rawSalesId && /^(SP|SR|MP|BM|RKN|SLS)-\d+/i.test(rawSirupId)) {
+                if (!rawSalesId && /^(SP|SR|MP|AM|BM|RKN|SLS)-\d+/i.test(rawSirupId)) {
                   rawSalesId = rawSirupId;
                   rawSirupId = '';
                 }
