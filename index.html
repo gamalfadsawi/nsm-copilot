@@ -403,26 +403,35 @@
 
         <!-- VIEW 3: REQUEST SALES -->
         <section id="view-requests" class="hidden space-y-4">
-          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 class="text-sm font-bold text-slate-900">Log Permintaan / Request dari Tim Sales</h3>
-              <p class="text-xs text-slate-500">Catat kebutuhan sampel buku, surat dukungan, penawaran harga, dan hubungkan ke follow-up kunjungan.</p>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Log Permintaan / Request dari Tim Sales</h3>
+                <p class="text-xs text-slate-500">Catat kebutuhan sampel buku, surat dukungan, penawaran harga, dan pantau progresnya hingga kunjungan selesai.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <select id="reqFilterSales" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                  <option value="">Semua Sales</option>
+                </select>
+                <select id="reqFilterStatus" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                  <option value="">Semua Status</option>
+                </select>
+                <button id="btnAddRequest" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Tambah Request</span>
+                </button>
+              </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <select id="reqFilterSales" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
-                <option value="">Semua Sales</option>
-              </select>
-              <select id="reqFilterStatus" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
-                <option value="">Semua Status</option>
-                <option value="Baru">Baru</option>
-                <option value="Diproses NSM">Diproses NSM</option>
-                <option value="Terkirim ke Sales">Terkirim ke Sales</option>
-                <option value="Selesai">Selesai</option>
-              </select>
-              <button id="btnAddRequest" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>Tambah Request</span>
-              </button>
+            <!-- Alur Status Request -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
+              <span class="font-bold text-slate-800">Alur Status Request:</span>
+              <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-semibold">1. Baru</span>
+              <span>&rarr;</span>
+              <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">2. Diproses NSM</span>
+              <span>&rarr;</span>
+              <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">3. Terkirim ke Sales</span>
+              <span>&rarr;</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">4. Selesai (Sudah Visit / Lapor)</span>
             </div>
           </div>
 
@@ -434,26 +443,31 @@
 
         <!-- VIEW 3B: PROGRAM PUSAT -->
         <section id="view-program" class="hidden space-y-4">
-          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 class="text-sm font-bold text-slate-900">Program Pusat — Proposal Visit Relasi KLPD &amp; Reporting WA</h3>
-              <p class="text-xs text-slate-500">Pusat menyiapkan proposal penawaran untuk dibawa sales saat visit ke relasi KLPD, lalu memantau laporan hasil kunjungan via WhatsApp.</p>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Program Pusat — Proposal Visit Relasi KLPD &amp; Reporting WA</h3>
+                <p class="text-xs text-slate-500">Pusat menyiapkan proposal penawaran untuk dibawa sales saat visit ke relasi KLPD, lalu memantau laporan hasil kunjungan via WhatsApp.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <select id="progFilterSales" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                  <option value="">Semua Sales</option>
+                </select>
+                <select id="progFilterStatus" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                  <option value="">Semua Status</option>
+                </select>
+                <button id="btnAddProgram" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>Buat Proposal Pusat</span>
+                </button>
+              </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <select id="progFilterSales" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
-                <option value="">Semua Sales</option>
-              </select>
-              <select id="progFilterStatus" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
-                <option value="">Semua Status</option>
-                <option value="Draft Pusat">Draft Pusat</option>
-                <option value="Siap Visit">Siap Visit</option>
-                <option value="Sudah Visit">Sudah Visit</option>
-                <option value="Follow-Up Selesai">Follow-Up Selesai</option>
-              </select>
-              <button id="btnAddProgram" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>Buat Proposal Pusat</span>
-              </button>
+            <!-- Sinkronisasi Alur Program Pusat & Status WA -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
+              <span class="font-bold text-slate-800">Sinkronisasi Otomatis:</span>
+              <span>Klik <strong>WA Proposal &amp; Visit</strong> &rarr; Status WA otomatis <strong>Menunggu Balasan</strong></span>
+              <span>•</span>
+              <span>Klik <strong>Lapor Hasil</strong> &rarr; Status Program menjadi <strong>Follow-Up Selesai</strong> &amp; Status WA <strong>Sudah Lapor</strong></span>
             </div>
           </div>
 
@@ -490,10 +504,6 @@
                   <span class="text-xs font-bold text-slate-700">Daftar Tim Sales &amp; Status WA</span>
                   <select id="waFilterStatus" class="text-xs px-2.5 py-1 rounded-md border border-slate-300 bg-white">
                     <option value="">Semua Status</option>
-                    <option value="Belum Di-WA">Belum Di-WA</option>
-                    <option value="Menunggu Balasan">Menunggu Balasan</option>
-                    <option value="Sudah Lapor">Sudah Lapor</option>
-                    <option value="Butuh Eskalasi">Butuh Eskalasi</option>
                   </select>
                 </div>
                 <div class="relative">
@@ -513,7 +523,7 @@
                       <span id="selSalesIdBadge" class="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">-</span>
                       <h4 id="selSalesName" class="text-base font-bold text-slate-900">-</h4>
                       <span id="selSalesRoleBadge" class="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700">-</span>
-                      <span id="selSalesBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">-</span>
+                      <select id="selSalesWaStatusSelect" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-300 bg-white cursor-pointer" title="Ubah status WA sales secara langsung"></select>
                       <button id="btnEditSales" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors" title="Edit atau Hapus Sales">
                         <i data-lucide="pencil" class="w-3 h-3"></i>
                         <span>Edit Sales</span>
@@ -625,10 +635,6 @@
               </select>
               <select id="repFilterHasil" class="px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
                 <option value="">Semua Hasil Kunjungan</option>
-                <option value="Prospek Panas">Prospek Panas</option>
-                <option value="Menunggu Anggaran">Menunggu Anggaran</option>
-                <option value="Butuh Penawaran Ulang">Butuh Penawaran Ulang</option>
-                <option value="Batal / Kalah">Batal / Kalah</option>
               </select>
             </div>
 
@@ -674,6 +680,51 @@
   <script>
     const STORAGE_KEY = 'nsm_ai_copilot_v1';
     const WINDOW_NAME_PREFIX = 'NSM_AI_STATE_V1:';
+
+    // =========================================================================
+    // MASTER STANDAR COMBO STATUS BAKU (TERKUNCI DI UI & TEMPLATE EXCEL)
+    // =========================================================================
+    const MASTER_ENUMS = {
+      SIRUP_JENIS: ['Barang', 'Pekerjaan Konstruksi', 'Jasa Konsultansi', 'Jasa Lainnya'],
+      SIRUP_METODE: ['E-Purchasing', 'Pengadaan Langsung', 'Tender', 'Seleksi', 'Dikecualikan'],
+      SIRUP_DANA: ['APBD', 'DAK', 'APBN', 'BLUD'],
+      SIRUP_STATUS: ['Peluang Baru', 'Sudah Di-assign', 'Follow-Up Sales', 'Selesai'],
+      REQUEST_KATEGORI: [
+        'Sampel Buku & Daftar Harga',
+        'Penawaran Harga / RAB',
+        'Surat Dukungan (LOA)',
+        'Revisi / Tayang Katalog',
+        'Approval Diskon Khusus',
+        'Pendampingan Kunjungan'
+      ],
+      REQUEST_PRIORITAS: ['Tinggi', 'Sedang', 'Rendah'],
+      REQUEST_STATUS: ['Baru', 'Diproses NSM', 'Terkirim ke Sales', 'Selesai'],
+      PROGRAM_STATUS: ['Draft Pusat', 'Siap Visit', 'Sudah Visit', 'Follow-Up Selesai'],
+      WA_STATUS: ['Belum Di-WA', 'Menunggu Balasan', 'Sudah Lapor', 'Butuh Eskalasi'],
+      VISIT_HASIL: ['Prospek Panas', 'Menunggu Anggaran', 'Butuh Penawaran Ulang', 'Batal / Kalah']
+    };
+
+    function matchEnum(val, allowedList, fallback) {
+      const clean = String(val ?? '').trim();
+      if (!clean) return fallback;
+      const exact = allowedList.find(item => item.toLowerCase() === clean.toLowerCase());
+      return exact || fallback;
+    }
+
+    function normalizeWaStatus(val) {
+      const clean = String(val ?? '').trim();
+      if (!clean) return 'Belum Di-WA';
+      const low = clean.toLowerCase();
+      if (low.includes('menunggu')) return 'Menunggu Balasan';
+      if (low.includes('sudah lapor')) return 'Sudah Lapor';
+      if (low.includes('eskalasi')) return 'Butuh Eskalasi';
+      if (low.includes('belum')) return 'Belum Di-WA';
+      return matchEnum(clean, MASTER_ENUMS.WA_STATUS, 'Belum Di-WA');
+    }
+
+    function buildSelectOptions(list, selectedVal = '') {
+      return list.map(opt => `<option value="${escapeHtml(opt)}" ${opt === selectedVal ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('');
+    }
 
     function getSirupDetailUrl(pkgOrId, customLink = '') {
       const explicit = String(customLink || (typeof pkgOrId === 'object' ? pkgOrId.linkSirup : '') || '').trim();
@@ -778,7 +829,7 @@
           pagu: 1450000000,
           metode: 'E-Purchasing',
           sumberDana: 'DAK',
-          jadwal: 'Januari 2027',
+          jadwal: '2027-01-15',
           status: 'Peluang Baru',
           linkSirup: 'https://sirup.inaproc.id/sirup/home/detailPaketPenyediaPublic2017/54829101',
           notes: 'Prioritas Katalog Elektronik V6, butuh kurasi produk & TKDN.'
@@ -792,7 +843,7 @@
           pagu: 1850000000,
           metode: 'E-Purchasing',
           sumberDana: 'APBD',
-          jadwal: 'Februari 2027',
+          jadwal: '2027-02-10',
           status: 'Sudah Di-assign',
           linkSirup: 'https://sirup.inaproc.id/sirup/home/detailPaketPenyediaPublic2017/54831244',
           notes: 'Kompatibel etalase Katalog Elektronik V6.'
@@ -806,7 +857,7 @@
           pagu: 920000000,
           metode: 'Tender',
           sumberDana: 'APBD',
-          jadwal: 'Maret 2027',
+          jadwal: '2027-03-05',
           status: 'Peluang Baru',
           linkSirup: 'https://sirup.inaproc.id/sirup/home/detailPaketPenyediaPublic2017/54840019',
           notes: 'Butuh SBUJK kualifikasi kecil/menengah & dukungan material.'
@@ -820,7 +871,7 @@
           pagu: 185000000,
           metode: 'Pengadaan Langsung',
           sumberDana: 'APBD',
-          jadwal: 'Desember 2026',
+          jadwal: '2026-12-10',
           status: 'Follow-Up Sales',
           linkSirup: 'https://sirup.inaproc.id/sirup/home/detailPaketPenyediaPublic2017/54851902',
           notes: 'Deadline akhir tahun, proses cepat via Pengadaan Langsung.'
@@ -834,7 +885,7 @@
           pagu: 1250000000,
           metode: 'Seleksi',
           sumberDana: 'APBD',
-          jadwal: 'Januari 2027',
+          jadwal: '2027-01-20',
           status: 'Peluang Baru',
           linkSirup: 'https://sirup.inaproc.id/sirup/home/detailPaketPenyediaPublic2017/54860411',
           notes: 'Paket konsultansi non-konstruksi, butuh tenaga ahli bersertifikat.'
@@ -1000,8 +1051,8 @@
           ringkasanProposal: 'Proposal teknis spesifikasi Chromebook & perangkat lab bersertifikat TKDN, garansi resmi 3 tahun, dan simulasi e-Purchasing.',
           targetVisit: '2026-11-25',
           status: 'Sudah Visit',
-          waReportStatus: 'Sudah Lapor Hasil',
-          hasilKunjungan: '2026-11-23 • Kabid Sarpras menyambut baik proposal pusat; meminta lampiran surat dukungan distributor sebelum tayang paket.'
+          waReportStatus: 'Sudah Lapor',
+          hasilKunjungan: '2026-11-23 • [Prospek Panas] Kabid Sarpras menyambut baik proposal pusat; meminta lampiran surat dukungan distributor sebelum tayang paket.'
         }
       ]
     };
@@ -1029,15 +1080,15 @@
           const cleanId = String(p.id || '').trim() || ('RUP-' + Math.floor(100000 + Math.random() * 900000));
           return {
             id: cleanId,
-            jenis: String(p.jenis || 'Barang').trim(),
+            jenis: matchEnum(p.jenis, MASTER_ENUMS.SIRUP_JENIS, 'Barang'),
             namaPaket: String(p.namaPaket || '').trim(),
             klpd: String(p.klpd || '').trim(),
             satker: String(p.satker || '').trim(),
             pagu: Number(p.pagu) || 0,
-            metode: String(p.metode || 'E-Purchasing').trim(),
-            sumberDana: String(p.sumberDana || 'APBD').trim(),
+            metode: matchEnum(p.metode, MASTER_ENUMS.SIRUP_METODE, 'E-Purchasing'),
+            sumberDana: matchEnum(p.sumberDana, MASTER_ENUMS.SIRUP_DANA, 'APBD'),
             jadwal: normalizeExcelDate(p.jadwal, '-'),
-            status: String(p.status || 'Peluang Baru').trim(),
+            status: matchEnum(p.status, MASTER_ENUMS.SIRUP_STATUS, 'Peluang Baru'),
             linkSirup: getSirupDetailUrl(cleanId, p.linkSirup),
             notes: String(p.notes || '').trim()
           };
@@ -1050,7 +1101,7 @@
             nama: String(s.nama || '').trim(),
             area: String(s.area || '-').trim(),
             wa: normalizePhone(s.wa),
-            waStatus: String(s.waStatus || 'Belum Di-WA').trim(),
+            waStatus: normalizeWaStatus(s.waStatus),
             lastWaSent: String(s.lastWaSent || '-').trim(),
             history: Array.isArray(s.history) ? s.history.map((h, idx) => ({
               id: String(h.id || `LAP-${100 + idx}`).trim(),
@@ -1059,7 +1110,7 @@
               refId: String(h.refId || '-').trim(),
               judulProgram: String(h.judulProgram || h.instansi || '-').trim(),
               instansi: String(h.instansi || '-').trim(),
-              hasil: String(h.hasil || 'Menunggu Anggaran').trim(),
+              hasil: matchEnum(h.hasil, MASTER_ENUMS.VISIT_HASIL, 'Menunggu Anggaran'),
               ringkasan: String(h.ringkasan || '-').trim()
             })) : []
           };
@@ -1068,11 +1119,11 @@
           id: String(r.id || '').trim() || ('REQ-' + Math.floor(100 + Math.random() * 900)),
           salesId: String(r.salesId || '').trim(),
           instansi: String(r.instansi || '').trim(),
-          kategori: String(r.kategori || 'Sampel Buku & Daftar Harga').trim(),
+          kategori: matchEnum(r.kategori, MASTER_ENUMS.REQUEST_KATEGORI, 'Sampel Buku & Daftar Harga'),
           detail: String(r.detail || '').trim(),
-          prioritas: String(r.prioritas || 'Sedang').trim(),
+          prioritas: matchEnum(r.prioritas, MASTER_ENUMS.REQUEST_PRIORITAS, 'Sedang'),
           deadline: normalizeExcelDate(r.deadline, getTodayISO()),
-          status: String(r.status || 'Baru').trim(),
+          status: matchEnum(r.status, MASTER_ENUMS.REQUEST_STATUS, 'Baru'),
           sirupId: String(r.sirupId || '').trim(),
           createdAt: normalizeExcelDate(r.createdAt, getTodayISO())
         }));
@@ -1085,8 +1136,8 @@
           salesId: String(p.salesId || '').trim(),
           ringkasanProposal: String(p.ringkasanProposal || '').trim(),
           targetVisit: normalizeExcelDate(p.targetVisit, getTodayISO()),
-          status: String(p.status || 'Siap Visit').trim(),
-          waReportStatus: String(p.waReportStatus || 'Belum Di-WA').trim(),
+          status: matchEnum(p.status, MASTER_ENUMS.PROGRAM_STATUS, 'Siap Visit'),
+          waReportStatus: normalizeWaStatus(p.waReportStatus),
           hasilKunjungan: String(p.hasilKunjungan || '').trim()
         }));
         if (!Array.isArray(parsed.completedDailyTasks)) {
@@ -1130,6 +1181,50 @@
       try {
         window.name = WINDOW_NAME_PREFIX + json;
       } catch (e) {}
+    }
+
+    // =========================================================================
+    // SINKRONISASI STATUS OTOMATIS ANTAR MENU (SIRUP <-> REQUEST <-> PROGRAM <-> WA)
+    // =========================================================================
+    function syncRequestStatusChange(req, newStatus) {
+      req.status = matchEnum(newStatus, MASTER_ENUMS.REQUEST_STATUS, 'Baru');
+      const sls = state.sales.find(s => s.id === req.salesId);
+      const pkg = req.sirupId ? state.sirup.find(p => p.id === req.sirupId) : null;
+
+      if (req.status === 'Diproses NSM' && pkg && pkg.status === 'Peluang Baru') {
+        pkg.status = 'Sudah Di-assign';
+      } else if (req.status === 'Terkirim ke Sales') {
+        if (pkg && pkg.status !== 'Selesai') pkg.status = 'Follow-Up Sales';
+        if (sls && sls.waStatus === 'Belum Di-WA') sls.waStatus = 'Menunggu Balasan';
+      } else if (req.status === 'Selesai') {
+        if (pkg) {
+          const otherOpenReqs = state.requests.some(r => r.id !== req.id && r.sirupId === pkg.id && r.status !== 'Selesai');
+          const otherOpenProgs = (state.programs || []).some(p => p.sirupId === pkg.id && p.status !== 'Follow-Up Selesai');
+          if (!otherOpenReqs && !otherOpenProgs) pkg.status = 'Selesai';
+        }
+      }
+    }
+
+    function syncProgramStatusChange(prog, newStatus) {
+      prog.status = matchEnum(newStatus, MASTER_ENUMS.PROGRAM_STATUS, 'Siap Visit');
+      const sls = state.sales.find(s => s.id === prog.salesId);
+      const pkg = prog.sirupId ? state.sirup.find(p => p.id === prog.sirupId) : null;
+
+      if ((prog.status === 'Draft Pusat' || prog.status === 'Siap Visit') && pkg && pkg.status === 'Peluang Baru') {
+        pkg.status = 'Sudah Di-assign';
+      } else if (prog.status === 'Sudah Visit') {
+        if (pkg && pkg.status !== 'Selesai') pkg.status = 'Follow-Up Sales';
+        if (prog.waReportStatus === 'Belum Di-WA') prog.waReportStatus = 'Menunggu Balasan';
+        if (sls && sls.waStatus === 'Belum Di-WA') sls.waStatus = 'Menunggu Balasan';
+      } else if (prog.status === 'Follow-Up Selesai') {
+        prog.waReportStatus = 'Sudah Lapor';
+        if (sls) sls.waStatus = 'Sudah Lapor';
+        if (pkg) {
+          const otherOpenReqs = state.requests.some(r => r.sirupId === pkg.id && r.status !== 'Selesai');
+          const otherOpenProgs = (state.programs || []).some(p => p.id !== prog.id && p.sirupId === pkg.id && p.status !== 'Follow-Up Selesai');
+          if (!otherOpenReqs && !otherOpenProgs) pkg.status = 'Selesai';
+        }
+      }
     }
 
     function formatRupiah(num) {
@@ -1283,33 +1378,17 @@
       document.getElementById('kpiWaPct').textContent = `${Math.round((waDone / totalSales) * 100)}% sales sudah lapor`;
       document.getElementById('kpiHotVisits').textContent = hotReports.length;
 
-      // Statistik Proposal Pusat, Visiting & Prospek Panas per Sales
       const allPrograms = state.programs || [];
       const visitedPrograms = allPrograms.filter(p => p.status === 'Sudah Visit' || p.status === 'Follow-Up Selesai');
 
       document.getElementById('statPropTotal').textContent = allPrograms.length;
-      renderSalesChipGroup(
-        'statPropSalesList',
-        allPrograms,
-        p => state.sales.find(s => s.id === p.salesId),
-        'bg-sky-50 text-sky-800 border-sky-200'
-      );
+      renderSalesChipGroup('statPropSalesList', allPrograms, p => state.sales.find(s => s.id === p.salesId), 'bg-sky-50 text-sky-800 border-sky-200');
 
       document.getElementById('statVisitTotal').textContent = visitedPrograms.length;
-      renderSalesChipGroup(
-        'statVisitSalesList',
-        visitedPrograms,
-        p => state.sales.find(s => s.id === p.salesId),
-        'bg-indigo-50 text-indigo-800 border-indigo-200'
-      );
+      renderSalesChipGroup('statVisitSalesList', visitedPrograms, p => state.sales.find(s => s.id === p.salesId), 'bg-indigo-50 text-indigo-800 border-indigo-200');
 
       document.getElementById('statHotTotal').textContent = hotReports.length;
-      renderSalesChipGroup(
-        'statHotSalesList',
-        hotReports,
-        h => ({ nama: h.salesNama }),
-        'bg-rose-50 text-rose-800 border-rose-200'
-      );
+      renderSalesChipGroup('statHotSalesList', hotReports, h => ({ nama: h.salesNama }), 'bg-rose-50 text-rose-800 border-rose-200');
 
       const topPkg = [...state.sirup].sort((a, b) => calcAiScore(b) - calcAiScore(a))[0];
       const needWa = state.sales.filter(s => s.waStatus === 'Belum Di-WA' || s.waStatus === 'Butuh Eskalasi');
@@ -1369,7 +1448,6 @@
       const today = getTodayISO();
       const tasks = [];
 
-      // 1. High Request Sales (Prioritas Tinggi & belum Selesai)
       state.requests
         .filter(r => r.status !== 'Selesai' && r.prioritas === 'Tinggi')
         .forEach(r => {
@@ -1388,7 +1466,7 @@
             actionLabel: r.status === 'Baru' ? 'Proses Request' : 'Follow-Up WA',
             onAction: () => {
               if (r.status === 'Baru') {
-                r.status = 'Diproses NSM';
+                syncRequestStatusChange(r, 'Diproses NSM');
                 saveState();
                 renderAll();
                 showToast(`Request ${r.id} ditandai Diproses NSM.`, 'success');
@@ -1400,7 +1478,6 @@
           });
         });
 
-      // 2. High Analisa SIRUP (Skor AI >= 80 & belum selesai)
       state.sirup
         .filter(p => calcAiScore(p) >= 80 && p.status !== 'Selesai')
         .forEach(p => {
@@ -1420,7 +1497,6 @@
           });
         });
 
-      // 3. High Program Pusat (Status Draft Pusat / Siap Visit / Belum Lapor Hasil)
       (state.programs || [])
         .filter(p => p.status !== 'Follow-Up Selesai')
         .forEach(p => {
@@ -1482,7 +1558,6 @@
       }
       emptyEl.classList.add('hidden');
 
-      // Sort unchecked tasks first, completed tasks at bottom
       const ordered = [...filteredTasks].sort((a, b) => Number(doneSet.has(a.key)) - Number(doneSet.has(b.key)));
 
       ordered.forEach((task, idx) => {
@@ -1533,7 +1608,7 @@
       const activeReqs = state.requests.filter(r => r.salesId === sales.id && r.status !== 'Selesai');
       const activeProgs = (state.programs || []).filter(p => p.salesId === sales.id && p.status !== 'Follow-Up Selesai');
       const highReqs = activeReqs.filter(r => r.prioritas === 'Tinggi');
-      const pendingWaProg = activeProgs.filter(p => p.waReportStatus !== 'Sudah Lapor Hasil');
+      const pendingWaProg = activeProgs.filter(p => p.waReportStatus !== 'Sudah Lapor');
 
       if (sales.waStatus === 'Butuh Eskalasi') {
         return {
@@ -1759,7 +1834,7 @@
       const filtered = state.sirup.filter(p => {
         const score = calcAiScore(p);
         const pJenis = p.jenis || 'Barang';
-        const matchQ = !q || [p.id, p.namaPaket, p.klpd, p.satker, p.notes, pJenis].join(' ').toLowerCase().includes(q);
+        const matchQ = !q || [p.id, p.namaPaket, p.klpd, p.satker, p.notes, pJenis, p.status].join(' ').toLowerCase().includes(q);
         const matchT = !jenis || pJenis === jenis;
         const matchM = !method || p.metode === method;
         const matchF = !fund || p.sumberDana === fund;
@@ -1791,7 +1866,9 @@
                 <i data-lucide="external-link" class="w-3 h-3"></i>
               </a>
               <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-medium">${escapeHtml(p.jenis || 'Barang')}</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${escapeHtml(p.status)}</span>
+              <select data-sirup-status class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold border border-slate-200 cursor-pointer">
+                ${buildSelectOptions(MASTER_ENUMS.SIRUP_STATUS, p.status)}
+              </select>
             </div>
             <p class="font-semibold text-slate-900 mt-1 leading-snug">${escapeHtml(p.namaPaket)}</p>
             <p class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(p.notes || '-')}</p>
@@ -1812,12 +1889,18 @@
             </span>
           </td>
           <td class="py-3.5 px-4 text-right whitespace-nowrap">
-            <button class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold transition-colors">
+            <button data-make-req class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold transition-colors">
               Buat Request
             </button>
           </td>
         `;
-        tr.querySelector('button').addEventListener('click', () => openAddRequestModal(p));
+        tr.querySelector('[data-sirup-status]').addEventListener('change', (e) => {
+          p.status = e.target.value;
+          saveState();
+          renderAll();
+          showToast(`Status paket ${p.id} diubah menjadi "${p.status}".`, 'success');
+        });
+        tr.querySelector('[data-make-req]').addEventListener('click', () => openAddRequestModal(p));
         tbody.appendChild(tr);
       });
       if (window.lucide) lucide.createIcons();
@@ -1829,8 +1912,12 @@
       salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
       salesSelect.value = curSales;
 
+      const statusSelect = document.getElementById('reqFilterStatus');
+      const curStatus = statusSelect.value;
+      statusSelect.innerHTML = '<option value="">Semua Status</option>' + buildSelectOptions(MASTER_ENUMS.REQUEST_STATUS, curStatus);
+
       const fSales = salesSelect.value;
-      const fStatus = document.getElementById('reqFilterStatus').value;
+      const fStatus = statusSelect.value;
 
       const filtered = state.requests.filter(r => (!fSales || r.salesId === fSales) && (!fStatus || r.status === fStatus));
       const grid = document.getElementById('requestsGrid');
@@ -1857,8 +1944,16 @@
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between gap-2">
-              <span class="text-[11px] font-mono text-slate-400">${escapeHtml(r.id)}</span>
-              <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${statusBadge[r.status] || 'bg-slate-100 text-slate-600'}">${escapeHtml(r.status)}</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-mono font-semibold text-slate-500">${escapeHtml(r.id)}</span>
+                ${r.sirupId ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${escapeHtml(r.sirupId)}</span>` : ''}
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${statusBadge[r.status] || 'bg-slate-100 text-slate-600'}">${escapeHtml(r.status)}</span>
+                <button data-edit-req class="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors" title="Edit Request">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
             </div>
             <h4 class="text-sm font-bold text-slate-900 mt-2">${escapeHtml(r.kategori)}</h4>
             <p class="text-xs font-medium text-indigo-600 mt-0.5">${escapeHtml(r.instansi)}</p>
@@ -1870,26 +1965,24 @@
               <span>Batas: <strong class="${r.prioritas === 'Tinggi' ? 'text-rose-600' : 'text-slate-700'}">${escapeHtml(normalizeExcelDate(r.deadline, '-'))}</strong></span>
             </div>
             <div class="flex items-center gap-2">
-              <select class="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50">
-                <option value="Baru" ${r.status === 'Baru' ? 'selected' : ''}>Baru</option>
-                <option value="Diproses NSM" ${r.status === 'Diproses NSM' ? 'selected' : ''}>Diproses NSM</option>
-                <option value="Terkirim ke Sales" ${r.status === 'Terkirim ke Sales' ? 'selected' : ''}>Terkirim ke Sales</option>
-                <option value="Selesai" ${r.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+              <select data-req-status class="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 font-medium">
+                ${buildSelectOptions(MASTER_ENUMS.REQUEST_STATUS, r.status)}
               </select>
-              <button class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1" title="Follow-up Sales via WA">
+              <button data-req-wa class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1" title="Follow-up Sales via WA">
                 <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
                 <span>WA</span>
               </button>
             </div>
           </div>
         `;
-        card.querySelector('select').addEventListener('change', (e) => {
-          r.status = e.target.value;
+        card.querySelector('[data-edit-req]').addEventListener('click', () => openEditRequestModal(r));
+        card.querySelector('[data-req-status]').addEventListener('change', (e) => {
+          syncRequestStatusChange(r, e.target.value);
           saveState();
           renderAll();
-          showToast(`Status ${r.id} diubah menjadi "${r.status}".`, 'success');
+          showToast(`Status ${r.id} diubah menjadi "${r.status}" & tersinkron.`, 'success');
         });
-        card.querySelector('button').addEventListener('click', () => {
+        card.querySelector('[data-req-wa]').addEventListener('click', () => {
           if (r.salesId) selectedSalesId = r.salesId;
           switchTab('followup');
         });
@@ -1951,7 +2044,11 @@
     }
 
     function renderFollowUp() {
-      const fStatus = document.getElementById('waFilterStatus').value;
+      const fStatusSelect = document.getElementById('waFilterStatus');
+      const curFStatus = fStatusSelect.value;
+      fStatusSelect.innerHTML = '<option value="">Semua Status</option>' + buildSelectOptions(MASTER_ENUMS.WA_STATUS, curFStatus);
+      const fStatus = fStatusSelect.value;
+
       const listEl = document.getElementById('salesFollowUpList');
       listEl.innerHTML = '';
 
@@ -2004,9 +2101,9 @@
       document.getElementById('selSalesIdBadge').textContent = sel.id;
       document.getElementById('selSalesName').textContent = sel.nama;
       document.getElementById('selSalesRoleBadge').textContent = getRoleLabelFromId(sel.id, sel.jabatan);
-      const badge = document.getElementById('selSalesBadge');
-      badge.textContent = sel.waStatus;
-      badge.className = `text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${badgeColors[sel.waStatus] || 'bg-slate-100 text-slate-600'}`;
+      const waSel = document.getElementById('selSalesWaStatusSelect');
+      waSel.innerHTML = buildSelectOptions(MASTER_ENUMS.WA_STATUS, sel.waStatus);
+      waSel.className = `text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-300 cursor-pointer ${badgeColors[sel.waStatus] || 'bg-slate-100 text-slate-600'}`;
       document.getElementById('selSalesMeta').textContent = `${sel.area} • WhatsApp: +${sel.wa}`;
 
       const reqs = state.requests.filter(r => r.salesId === sel.id && r.status !== 'Selesai');
@@ -2067,10 +2164,14 @@
       salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
       salesSelect.value = curSales;
 
+      const hasilSelect = document.getElementById('repFilterHasil');
+      const curHasil = hasilSelect.value;
+      hasilSelect.innerHTML = '<option value="">Semua Hasil Kunjungan</option>' + buildSelectOptions(MASTER_ENUMS.VISIT_HASIL, curHasil);
+
       const q = (document.getElementById('repSearch')?.value || '').trim().toLowerCase();
       const fSales = salesSelect.value;
       const fSource = document.getElementById('repFilterSource').value;
-      const fHasil = document.getElementById('repFilterHasil').value;
+      const fHasil = hasilSelect.value;
 
       const allReports = getAllVisitReports();
       const filtered = allReports.filter(r => {
@@ -2170,27 +2271,29 @@
             <label class="block font-semibold text-slate-700 mb-1">Instansi / Dinas / Sekolah Tujuan</label>
             <input name="instansi" required value="${prefillPkg ? escapeHtml(prefillPkg.satker) : ''}" placeholder="Contoh: Dinas Pendidikan Kab. Klaten" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Kategori Request</label>
               <select name="kategori" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option>Sampel Buku &amp; Daftar Harga</option>
-                <option>Penawaran Harga / RAB</option>
-                <option>Surat Dukungan (LOA)</option>
-                <option>Revisi / Tayang Katalog</option>
-                <option>Approval Diskon Khusus</option>
-                <option>Pendampingan Kunjungan</option>
+                ${buildSelectOptions(MASTER_ENUMS.REQUEST_KATEGORI, 'Sampel Buku & Daftar Harga')}
               </select>
             </div>
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Prioritas</label>
               <select name="prioritas" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option value="Tinggi">Tinggi</option>
-                <option value="Sedang" selected>Sedang</option>
-                <option value="Rendah">Rendah</option>
+                ${buildSelectOptions(MASTER_ENUMS.REQUEST_PRIORITAS, 'Sedang')}
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Status Request</label>
+              <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-semibold text-indigo-700">
+                ${buildSelectOptions(MASTER_ENUMS.REQUEST_STATUS, 'Baru')}
               </select>
             </div>
           </div>
+          <p class="text-[11px] text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+            <strong>Kapan diubah?</strong> <em>Baru</em> (masuk dari sales) &rarr; <em>Diproses NSM</em> (sedang disiapkan) &rarr; <em>Terkirim ke Sales</em> (sudah dikirim, otomatis memicu Follow-Up WA) &rarr; <em>Selesai</em> (setelah hasil visit dicatat).
+          </p>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Detail Kebutuhan</label>
             <textarea name="detail" required rows="3" placeholder="Jelaskan kebutuhan judul, jumlah eksemplar, atau syarat tender..." class="w-full px-3 py-2 rounded-lg border border-slate-300">${prefillPkg ? 'Tindak lanjut paket: ' + escapeHtml(prefillPkg.namaPaket) : ''}</textarea>
@@ -2228,11 +2331,96 @@
           sirupId: fd.get('sirupId'),
           createdAt: getTodayISO()
         };
+        syncRequestStatusChange(newReq, fd.get('status') || 'Baru');
         state.requests.unshift(newReq);
         saveState();
         closeModal();
         renderAll();
-        showToast(`Request ${newReq.id} berhasil dicatat.`, 'success');
+        showToast(`Request ${newReq.id} (${newReq.status}) berhasil dicatat.`, 'success');
+      });
+    }
+
+    function openEditRequestModal(req) {
+      const salesOpts = state.sales.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === req.salesId ? 'selected' : ''}>[${escapeHtml(s.id)}] ${escapeHtml(s.nama)} (${escapeHtml(s.area)})</option>`).join('');
+      const pkgOpts = '<option value="">-- Opsional: Kaitkan ke Paket SIRUP --</option>' +
+        state.sirup.map(p => `<option value="${escapeHtml(p.id)}" ${req.sirupId === p.id ? 'selected' : ''}>${escapeHtml(p.id)} — ${escapeHtml(p.klpd)}</option>`).join('');
+
+      openModal(`Edit Request Sales — ${req.id}`, `
+        <form id="formEditRequest" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Nama Sales</label>
+            <select name="salesId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${salesOpts}</select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Instansi / Dinas / Sekolah Tujuan</label>
+            <input name="instansi" required value="${escapeHtml(req.instansi)}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Kategori Request</label>
+              <select name="kategori" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                ${buildSelectOptions(MASTER_ENUMS.REQUEST_KATEGORI, req.kategori)}
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Prioritas</label>
+              <select name="prioritas" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                ${buildSelectOptions(MASTER_ENUMS.REQUEST_PRIORITAS, req.prioritas)}
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Status Request</label>
+              <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-semibold text-indigo-700">
+                ${buildSelectOptions(MASTER_ENUMS.REQUEST_STATUS, req.status)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Detail Kebutuhan</label>
+            <textarea name="detail" required rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-300">${escapeHtml(req.detail)}</textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Deadline</label>
+              <input name="deadline" type="date" required value="${escapeHtml(normalizeExcelDate(req.deadline, getTodayISO()))}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Tautkan Paket SIRUP</label>
+              <select name="sirupId" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${pkgOpts}</select>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <button type="button" id="btnDeleteReq" class="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold">Hapus Request</button>
+            <div class="flex gap-2">
+              <button type="button" id="cancelModalBtn" class="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold">Batal</button>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">Simpan Perubahan</button>
+            </div>
+          </div>
+        </form>
+      `);
+      document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+      document.getElementById('btnDeleteReq').addEventListener('click', () => {
+        state.requests = state.requests.filter(x => x.id !== req.id);
+        saveState();
+        closeModal();
+        renderAll();
+        showToast(`Request ${req.id} dihapus.`, 'info');
+      });
+      document.getElementById('formEditRequest').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        req.salesId = fd.get('salesId');
+        req.instansi = fd.get('instansi').trim();
+        req.kategori = fd.get('kategori');
+        req.prioritas = fd.get('prioritas');
+        req.detail = fd.get('detail').trim();
+        req.deadline = fd.get('deadline');
+        req.sirupId = fd.get('sirupId');
+        syncRequestStatusChange(req, fd.get('status'));
+        saveState();
+        closeModal();
+        renderAll();
+        showToast(`Request ${req.id} berhasil diperbarui.`, 'success');
       });
     }
 
@@ -2247,10 +2435,7 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Jenis Pengadaan</label>
               <select name="jenis" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option value="Barang">Barang</option>
-                <option value="Pekerjaan Konstruksi">Pekerjaan Konstruksi</option>
-                <option value="Jasa Konsultansi">Jasa Konsultansi</option>
-                <option value="Jasa Lainnya">Jasa Lainnya</option>
+                ${buildSelectOptions(MASTER_ENUMS.SIRUP_JENIS, 'Barang')}
               </select>
             </div>
             <div>
@@ -2276,25 +2461,18 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Metode</label>
               <select name="metode" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option>E-Purchasing</option>
-                <option>Pengadaan Langsung</option>
-                <option>Tender</option>
-                <option>Seleksi</option>
-                <option>Dikecualikan</option>
+                ${buildSelectOptions(MASTER_ENUMS.SIRUP_METODE, 'E-Purchasing')}
               </select>
             </div>
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Sumber Dana</label>
               <select name="sumberDana" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option>APBD</option>
-                <option>DAK</option>
-                <option>APBN</option>
-                <option>BLUD</option>
+                ${buildSelectOptions(MASTER_ENUMS.SIRUP_DANA, 'APBD')}
               </select>
             </div>
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Jadwal Pemilihan</label>
-              <input name="jadwal" required value="Januari 2027" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+              <input name="jadwal" type="date" required value="${getTodayISO()}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
             </div>
           </div>
           <div>
@@ -2318,14 +2496,14 @@
         const cleanId = fd.get('id').trim();
         state.sirup.unshift({
           id: cleanId,
-          jenis: fd.get('jenis') || 'Barang',
+          jenis: matchEnum(fd.get('jenis'), MASTER_ENUMS.SIRUP_JENIS, 'Barang'),
           namaPaket: fd.get('namaPaket').trim(),
           klpd: fd.get('klpd').trim(),
           satker: fd.get('satker').trim(),
           pagu: Number(fd.get('pagu')) || 0,
-          metode: fd.get('metode'),
-          sumberDana: fd.get('sumberDana'),
-          jadwal: fd.get('jadwal').trim(),
+          metode: matchEnum(fd.get('metode'), MASTER_ENUMS.SIRUP_METODE, 'E-Purchasing'),
+          sumberDana: matchEnum(fd.get('sumberDana'), MASTER_ENUMS.SIRUP_DANA, 'APBD'),
+          jadwal: normalizeExcelDate(fd.get('jadwal'), getTodayISO()),
           status: 'Peluang Baru',
           linkSirup: getSirupDetailUrl(cleanId, fd.get('linkSirup')),
           notes: fd.get('notes').trim()
@@ -2341,7 +2519,7 @@
       openModal('Impor Data CSV / Paste dari SIRUP.INAPROC.ID', `
         <form id="formImportSirup" class="space-y-3 text-xs">
           <p class="text-slate-600 leading-relaxed">Tempel baris CSV dengan format: <code class="bg-slate-100 px-1 py-0.5 rounded">KodeRUP,NamaPaket,KLPD,Satker,PaguAngka,Metode,SumberDana,Jadwal,JenisPengadaan,LinkSIRUP</code> (kolom JenisPengadaan &amp; LinkSIRUP opsional).</p>
-          <textarea name="csvText" rows="6" required placeholder="RUP-55011223,Pengadaan Laptop Laboratorium SMP,Kab. Magelang,Dinas Pendidikan Kab. Magelang,320000000,E-Purchasing,DAK,Februari 2027,Barang" class="w-full p-3 rounded-xl border border-slate-300 font-mono text-[11px]"></textarea>
+          <textarea name="csvText" rows="6" required placeholder="RUP-55011223,Pengadaan Laptop Laboratorium SMP,Kab. Magelang,Dinas Pendidikan Kab. Magelang,320000000,E-Purchasing,DAK,2027-02-15,Barang" class="w-full p-3 rounded-xl border border-slate-300 font-mono text-[11px]"></textarea>
           <div class="pt-2 flex justify-end gap-2">
             <button type="button" id="cancelModalBtn" class="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold">Batal</button>
             <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">Impor &amp; Analisa</button>
@@ -2359,14 +2537,14 @@
             const cleanId = cols[0] || 'RUP-' + Math.floor(100000 + Math.random() * 900000);
             state.sirup.unshift({
               id: cleanId,
-              jenis: cols[8] || 'Barang',
+              jenis: matchEnum(cols[8], MASTER_ENUMS.SIRUP_JENIS, 'Barang'),
               namaPaket: cols[1] || 'Paket Pengadaan',
               klpd: cols[2] || 'Pemda',
               satker: cols[3] || 'Dinas Terkait',
               pagu: Number(cols[4].replace(/[^\d]/g, '')) || 0,
-              metode: cols[5] || 'E-Purchasing',
-              sumberDana: cols[6] || 'APBD',
-              jadwal: cols[7] || '2027',
+              metode: matchEnum(cols[5], MASTER_ENUMS.SIRUP_METODE, 'E-Purchasing'),
+              sumberDana: matchEnum(cols[6], MASTER_ENUMS.SIRUP_DANA, 'APBD'),
+              jadwal: normalizeExcelDate(cols[7], getTodayISO()),
               status: 'Peluang Baru',
               linkSirup: getSirupDetailUrl(cleanId, cols[9] || ''),
               notes: 'Diimpor dari CSV SIRUP'
@@ -2421,18 +2599,13 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Hasil Visit Relasi KLPD</label>
               <select name="hasil" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option value="Prospek Panas">Prospek Panas</option>
-                <option value="Menunggu Anggaran">Menunggu Anggaran</option>
-                <option value="Butuh Penawaran Ulang">Butuh Penawaran Ulang</option>
-                <option value="Batal / Kalah">Batal / Kalah</option>
+                ${buildSelectOptions(MASTER_ENUMS.VISIT_HASIL, 'Prospek Panas')}
               </select>
             </div>
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Update Status WA Sales</label>
               <select name="waStatus" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option value="Sudah Lapor">Sudah Lapor</option>
-                <option value="Butuh Eskalasi">Butuh Eskalasi</option>
-                <option value="Menunggu Balasan">Menunggu Balasan</option>
+                ${buildSelectOptions(MASTER_ENUMS.WA_STATUS, 'Sudah Lapor')}
               </select>
             </div>
           </div>
@@ -2458,9 +2631,10 @@
         const fd = new FormData(e.target);
         const tanggalVisit = fd.get('tanggalVisit') || getTodayISO();
         const instansi = fd.get('instansi').trim();
-        const hasil = fd.get('hasil');
+        const hasil = matchEnum(fd.get('hasil'), MASTER_ENUMS.VISIT_HASIL, 'Menunggu Anggaran');
         const ringkasan = fd.get('ringkasan').trim();
         const refItem = fd.get('refItem') || '';
+        const newWaStatus = normalizeWaStatus(fd.get('waStatus'));
 
         let sumberJenis = 'Kunjungan Umum';
         let refId = '-';
@@ -2473,9 +2647,9 @@
           const prog = (state.programs || []).find(p => p.id === pId);
           if (prog) {
             judulProgram = prog.judul;
-            prog.status = 'Follow-Up Selesai';
-            prog.waReportStatus = 'Sudah Lapor Hasil';
             prog.hasilKunjungan = `${tanggalVisit} • [${hasil}] ${ringkasan}`;
+            syncProgramStatusChange(prog, 'Follow-Up Selesai');
+            prog.waReportStatus = newWaStatus;
           }
         } else if (refItem.startsWith('REQ:')) {
           const rId = refItem.slice(4);
@@ -2484,7 +2658,7 @@
           const req = state.requests.find(r => r.id === rId);
           if (req) {
             judulProgram = req.kategori;
-            if (hasil === 'Batal / Kalah') req.status = 'Selesai';
+            syncRequestStatusChange(req, 'Selesai');
           }
         }
 
@@ -2498,12 +2672,12 @@
           hasil,
           ringkasan
         });
-        sales.waStatus = fd.get('waStatus');
+        sales.waStatus = newWaStatus;
 
         saveState();
         closeModal();
         renderAll();
-        showToast(`Laporan kunjungan ${sales.nama} tersimpan ke Riwayat Database.`, 'success');
+        showToast(`Laporan kunjungan ${sales.nama} tersimpan & status tugas diperbarui.`, 'success');
       });
     }
 
@@ -2546,10 +2720,7 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Status Follow-Up WA</label>
               <select name="waStatus" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option value="Belum Di-WA" ${sales.waStatus === 'Belum Di-WA' ? 'selected' : ''}>Belum Di-WA</option>
-                <option value="Menunggu Balasan" ${sales.waStatus === 'Menunggu Balasan' ? 'selected' : ''}>Menunggu Balasan</option>
-                <option value="Sudah Lapor" ${sales.waStatus === 'Sudah Lapor' ? 'selected' : ''}>Sudah Lapor</option>
-                <option value="Butuh Eskalasi" ${sales.waStatus === 'Butuh Eskalasi' ? 'selected' : ''}>Butuh Eskalasi</option>
+                ${buildSelectOptions(MASTER_ENUMS.WA_STATUS, sales.waStatus)}
               </select>
             </div>
           </div>
@@ -2598,7 +2769,7 @@
         sales.nama = fd.get('nama').trim();
         sales.area = fd.get('area').trim();
         sales.wa = normalizePhone(fd.get('wa'));
-        sales.waStatus = fd.get('waStatus');
+        sales.waStatus = normalizeWaStatus(fd.get('waStatus'));
         if (oldId !== newId) {
           state.requests.forEach(r => { if (r.salesId === oldId) r.salesId = newId; });
           (state.programs || []).forEach(p => { if (p.salesId === oldId) p.salesId = newId; });
@@ -2756,6 +2927,23 @@
       showToast('Laporan hasil kunjungan berhasil diekspor ke Excel.', 'success');
     }
 
+    function buildComboGuideSheetRows() {
+      return [
+        { Sheet: 'SIRUP', Kolom: 'Jenis_Pengadaan', Pilihan_Combo_Baku: MASTER_ENUMS.SIRUP_JENIS.join(' | '), Keterangan: 'Pilih salah satu jenis pengadaan resmi' },
+        { Sheet: 'SIRUP', Kolom: 'Metode_Pemilihan', Pilihan_Combo_Baku: MASTER_ENUMS.SIRUP_METODE.join(' | '), Keterangan: 'Metode pengadaan di SIRUP INAPROC' },
+        { Sheet: 'SIRUP', Kolom: 'Sumber_Dana', Pilihan_Combo_Baku: MASTER_ENUMS.SIRUP_DANA.join(' | '), Keterangan: 'Sumber anggaran paket pengadaan' },
+        { Sheet: 'SIRUP', Kolom: 'Status', Pilihan_Combo_Baku: MASTER_ENUMS.SIRUP_STATUS.join(' | '), Keterangan: 'Status tindak lanjut paket SIRUP' },
+        { Sheet: 'Sales', Kolom: 'ID_Sales (Prefix)', Pilihan_Combo_Baku: 'SP-01 (Sales Project) | SR-01 (Sales Reguler) | MP-01 (Manager Project) | BM-01 (Branch Manager) | RKN-01 (Rekanan)', Keterangan: 'Gunakan awalan kode peran yang sesuai' },
+        { Sheet: 'Sales', Kolom: 'Status_WA', Pilihan_Combo_Baku: MASTER_ENUMS.WA_STATUS.join(' | '), Keterangan: 'Status follow-up WA mingguan sales' },
+        { Sheet: 'Request', Kolom: 'Kategori_Request', Pilihan_Combo_Baku: MASTER_ENUMS.REQUEST_KATEGORI.join(' | '), Keterangan: 'Jenis kebutuhan yang diminta sales' },
+        { Sheet: 'Request', Kolom: 'Prioritas', Pilihan_Combo_Baku: MASTER_ENUMS.REQUEST_PRIORITAS.join(' | '), Keterangan: 'Tinggi akan masuk Task Prioritas Harian' },
+        { Sheet: 'Request', Kolom: 'Status', Pilihan_Combo_Baku: MASTER_ENUMS.REQUEST_STATUS.join(' | '), Keterangan: 'Alur: Baru -> Diproses NSM -> Terkirim ke Sales -> Selesai' },
+        { Sheet: 'Program_Pusat', Kolom: 'Status', Pilihan_Combo_Baku: MASTER_ENUMS.PROGRAM_STATUS.join(' | '), Keterangan: 'Alur: Draft Pusat -> Siap Visit -> Sudah Visit -> Follow-Up Selesai' },
+        { Sheet: 'Program_Pusat', Kolom: 'Status_WA_Report', Pilihan_Combo_Baku: MASTER_ENUMS.WA_STATUS.join(' | '), Keterangan: 'Selaras dengan Status WA sales' },
+        { Sheet: 'Riwayat_Kunjungan', Kolom: 'Hasil_Kunjungan', Pilihan_Combo_Baku: MASTER_ENUMS.VISIT_HASIL.join(' | '), Keterangan: 'Kategori hasil kunjungan lapangan' }
+      ];
+    }
+
     function exportAllDatabaseXlsx() {
       if (typeof XLSX === 'undefined') {
         showToast('Library Excel sedang dimuat, silakan coba sebentar lagi.', 'error');
@@ -2834,8 +3022,9 @@
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(requestRows), 'Request');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(programRows), 'Program_Pusat');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(historyRows), 'Riwayat_Kunjungan');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(buildComboGuideSheetRows()), 'Panduan_Combo_Status');
       XLSX.writeFile(wb, `Backup_Database_NSM_AI_${getTodayISO()}.xlsx`);
-      showToast('Seluruh database (5 sheet termasuk Riwayat Kunjungan) berhasil disimpan.', 'success');
+      showToast('Seluruh database + Panduan Combo Status berhasil disimpan.', 'success');
     }
 
     function downloadExcelTemplate() {
@@ -2844,6 +3033,121 @@
         return;
       }
       const wb = XLSX.utils.book_new();
+
+      const guideRows = [
+        {
+          Sheet: 'UMUM (Semua Sheet)',
+          Nama_Kolom: 'Format Tanggal & ID',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Tanggal: YYYY-MM-DD (Contoh: 2026-11-30) | ID_Sales: SP-01, SR-01, MP-01, BM-01, RKN-01',
+          Keterangan_Pengisian: 'Jangan ubah nama header kolom. Jika ID_Sales dikosongkan pada sheet Sales, sistem otomatis membuat kode SP-xx.'
+        },
+        {
+          Sheet: 'SIRUP',
+          Nama_Kolom: 'Jenis_Pengadaan',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Barang | Pekerjaan Konstruksi | Jasa Konsultansi | Jasa Lainnya',
+          Keterangan_Pengisian: 'Pilih salah satu dari 4 jenis pengadaan resmi SIRUP.INAPROC.'
+        },
+        {
+          Sheet: 'SIRUP',
+          Nama_Kolom: 'Metode_Pemilihan',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'E-Purchasing | Pengadaan Langsung | Tender | Seleksi | Dikecualikan',
+          Keterangan_Pengisian: 'Metode pemilihan penyedia pada paket RUP.'
+        },
+        {
+          Sheet: 'SIRUP',
+          Nama_Kolom: 'Sumber_Dana',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'APBD | APBN | DAK | BLUD',
+          Keterangan_Pengisian: 'Sumber anggaran paket pengadaan.'
+        },
+        {
+          Sheet: 'SIRUP',
+          Nama_Kolom: 'Status',
+          Wajib: 'Opsional',
+          Pilihan_Combo_Baku: 'Peluang Baru | Sudah Di-assign | Follow-Up Sales | Selesai',
+          Keterangan_Pengisian: 'Status tindak lanjut peluang RUP (default: Peluang Baru).'
+        },
+        {
+          Sheet: 'SIRUP',
+          Nama_Kolom: 'Link_SIRUP',
+          Wajib: 'Opsional',
+          Pilihan_Combo_Baku: 'https://sirup.inaproc.id/sirup/home/detailPaketPenyediaPublic2017/{KodeRUP}',
+          Keterangan_Pengisian: 'Otomatis dibuat oleh sistem dari Kode_RUP jika dikosongkan.'
+        },
+        {
+          Sheet: 'Sales',
+          Nama_Kolom: 'Kategori_Jabatan & ID_Sales',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'SP-... (Sales Project) | SR-... (Sales Reguler) | MP-... (Manager Project) | BM-... (Branch Manager) | RKN-... (Rekanan)',
+          Keterangan_Pengisian: 'Gunakan awalan kode SP/SR/MP/BM/RKN diikuti nomor urut (contoh: SP-01, SR-02).'
+        },
+        {
+          Sheet: 'Sales',
+          Nama_Kolom: 'No_WhatsApp',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Format 628xxxxxxxxxx (tanpa + atau spasi)',
+          Keterangan_Pengisian: 'Jika diawali 08..., sistem otomatis mengonversinya menjadi 628...'
+        },
+        {
+          Sheet: 'Sales',
+          Nama_Kolom: 'Status_WA',
+          Wajib: 'Opsional',
+          Pilihan_Combo_Baku: 'Belum Di-WA | Menunggu Balasan | Sudah Lapor | Butuh Eskalasi',
+          Keterangan_Pengisian: 'Status komunikasi WhatsApp mingguan sales (default: Belum Di-WA).'
+        },
+        {
+          Sheet: 'Request',
+          Nama_Kolom: 'Kategori_Request',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Sampel Buku & Daftar Harga | Penawaran Harga / RAB | Surat Dukungan (LOA) | Revisi / Tayang Katalog | Approval Diskon Khusus | Pendampingan Kunjungan',
+          Keterangan_Pengisian: 'Jenis kebutuhan yang diminta sales ke NSM/Pusat.'
+        },
+        {
+          Sheet: 'Request',
+          Nama_Kolom: 'Prioritas',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Tinggi | Sedang | Rendah',
+          Keterangan_Pengisian: 'Pilihan "Tinggi" akan otomatis masuk ke daftar Task Prioritas Harian Wajib Dikerjakan.'
+        },
+        {
+          Sheet: 'Request',
+          Nama_Kolom: 'Status',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Baru | Diproses NSM | Terkirim ke Sales | Selesai',
+          Keterangan_Pengisian: 'Alur pengerjaan request dari awal hingga selesai.'
+        },
+        {
+          Sheet: 'Program_Pusat',
+          Nama_Kolom: 'Status',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Draft Pusat | Siap Visit | Sudah Visit | Follow-Up Selesai',
+          Keterangan_Pengisian: 'Status kesiapan & pelaksanaan visit proposal pusat ke relasi KLPD.'
+        },
+        {
+          Sheet: 'Program_Pusat',
+          Nama_Kolom: 'Status_WA_Report',
+          Wajib: 'Opsional',
+          Pilihan_Combo_Baku: 'Belum Di-WA | Menunggu Laporan WA | Sudah Lapor Hasil',
+          Keterangan_Pengisian: 'Status pengiriman proposal & pelaporan visit via WhatsApp.'
+        },
+        {
+          Sheet: 'Riwayat_Kunjungan',
+          Nama_Kolom: 'Sumber_Tugas',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Program Pusat | Request Sales | Kunjungan Umum',
+          Keterangan_Pengisian: 'Asal penugasan kunjungan lapangan yang dilaporkan sales.'
+        },
+        {
+          Sheet: 'Riwayat_Kunjungan',
+          Nama_Kolom: 'Hasil_Kunjungan',
+          Wajib: 'Wajib',
+          Pilihan_Combo_Baku: 'Prospek Panas | Menunggu Anggaran | Butuh Penawaran Ulang | Batal / Kalah',
+          Keterangan_Pengisian: 'Hasil akhir kunjungan; "Prospek Panas" akan otomatis dihitung pada KPI & Statistik Dashboard.'
+        }
+      ];
 
       const sirupRows = [
         {
@@ -2855,7 +3159,7 @@
           Pagu_Rp: 450000000,
           Metode_Pemilihan: 'E-Purchasing',
           Sumber_Dana: 'DAK',
-          Jadwal_Pemilihan: 'Februari 2027',
+          Jadwal_Pemilihan: '2027-02-15',
           Status: 'Peluang Baru',
           Link_SIRUP: 'https://sirup.inaproc.id/sirup/home/detailPaketPenyediaPublic2017/55011223',
           Catatan: 'Contoh baris template SIRUP (kolom Link_SIRUP otomatis dibuat jika dikosongkan)'
@@ -2951,13 +3255,16 @@
         }
       ];
 
+      const wsGuide = XLSX.utils.json_to_sheet(guideRows);
+      wsGuide['!cols'] = [{ wch: 20 }, { wch: 28 }, { wch: 10 }, { wch: 68 }, { wch: 58 }];
+      XLSX.utils.book_append_sheet(wb, wsGuide, 'Cara_Pengisian');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sirupRows), 'SIRUP');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salesRows), 'Sales');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(requestRows), 'Request');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(programRows), 'Program_Pusat');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(historyRows), 'Riwayat_Kunjungan');
       XLSX.writeFile(wb, 'Template_Database_NSM_AI.xlsx');
-      showToast('Template Excel (5 Sheet dengan kode SP/SR/MP/BM/RKN) berhasil diunduh.', 'success');
+      showToast('Template Excel (6 Sheet termasuk Cara_Pengisian & Combo) berhasil diunduh.', 'success');
     }
 
     function openExcelHubModal() {
@@ -2966,7 +3273,7 @@
           <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p class="font-bold text-indigo-900">1. Unduh Template Excel Resmi</p>
-              <p class="text-indigo-700 mt-0.5">Berisi 5 sheet siap isi: <strong>SIRUP</strong>, <strong>Sales</strong> (SP/SR/MP/BM/RKN), <strong>Request</strong>, <strong>Program_Pusat</strong>, dan <strong>Riwayat_Kunjungan</strong>.</p>
+              <p class="text-indigo-700 mt-0.5">Berisi sheet <strong>Cara_Pengisian</strong> (daftar combo baku) + 5 sheet data: <strong>SIRUP</strong>, <strong>Sales</strong>, <strong>Request</strong>, <strong>Program_Pusat</strong>, dan <strong>Riwayat_Kunjungan</strong>.</p>
             </div>
             <button type="button" id="btnDownloadTemplateXlsx" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition-colors">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -3049,15 +3356,15 @@
                 const cleanId = String(r.Kode_RUP || r.id || ('RUP-' + Math.floor(100000 + Math.random() * 900000))).trim();
                 return {
                   id: cleanId,
-                  jenis: String(r.Jenis_Pengadaan || r.jenis || 'Barang').trim(),
+                  jenis: matchEnum(r.Jenis_Pengadaan || r.jenis, MASTER_ENUMS.SIRUP_JENIS, 'Barang'),
                   namaPaket: String(r.Nama_Paket || r.namaPaket || 'Paket Pengadaan').trim(),
                   klpd: String(r.KLPD || r.klpd || 'Pemda').trim(),
                   satker: String(r.Satker || r.satker || 'Dinas Terkait').trim(),
                   pagu: Number(String(r.Pagu_Rp || r.pagu || 0).replace(/[^\d]/g, '')) || 0,
-                  metode: String(r.Metode_Pemilihan || r.metode || 'E-Purchasing').trim(),
-                  sumberDana: String(r.Sumber_Dana || r.sumberDana || 'APBD').trim(),
-                  jadwal: normalizeExcelDate(r.Jadwal_Pemilihan ?? r.jadwal, '2027'),
-                  status: String(r.Status || r.status || 'Peluang Baru').trim(),
+                  metode: matchEnum(r.Metode_Pemilihan || r.metode, MASTER_ENUMS.SIRUP_METODE, 'E-Purchasing'),
+                  sumberDana: matchEnum(r.Sumber_Dana || r.sumberDana, MASTER_ENUMS.SIRUP_DANA, 'APBD'),
+                  jadwal: normalizeExcelDate(r.Jadwal_Pemilihan ?? r.jadwal, getTodayISO()),
+                  status: matchEnum(r.Status || r.status, MASTER_ENUMS.SIRUP_STATUS, 'Peluang Baru'),
                   linkSirup: getSirupDetailUrl(cleanId, r.Link_SIRUP || r.linkSirup || ''),
                   notes: String(r.Catatan || r.notes || 'Diimpor dari Excel').trim()
                 };
@@ -3081,7 +3388,7 @@
                   nama: String(r.Nama_Sales || r.nama || '').trim(),
                   area: String(r.Wilayah_Area || r.area || '-').trim(),
                   wa: normalizePhone(r.No_WhatsApp || r.wa),
-                  waStatus: String(r.Status_WA || r.waStatus || 'Belum Di-WA').trim(),
+                  waStatus: normalizeWaStatus(r.Status_WA || r.waStatus),
                   lastWaSent: '-',
                   history: []
                 };
@@ -3109,18 +3416,20 @@
             const processRequests = (rows) => {
               const mapped = rows.map(r => {
                 const sId = resolveSalesId(r.ID_Sales || r.salesId, r.Nama_Sales);
-                return {
+                const reqObj = {
                   id: String(r.ID_Request || r.id || ('REQ-' + Math.floor(100 + Math.random() * 900))).trim(),
                   salesId: sId,
                   instansi: String(r.Instansi_Tujuan || r.instansi || '').trim(),
-                  kategori: String(r.Kategori_Request || r.kategori || 'Sampel Buku & Daftar Harga').trim(),
+                  kategori: matchEnum(r.Kategori_Request || r.kategori, MASTER_ENUMS.REQUEST_KATEGORI, 'Sampel Buku & Daftar Harga'),
                   detail: String(r.Detail_Kebutuhan || r.detail || '-').trim(),
-                  prioritas: String(r.Prioritas || r.prioritas || 'Sedang').trim(),
+                  prioritas: matchEnum(r.Prioritas || r.prioritas, MASTER_ENUMS.REQUEST_PRIORITAS, 'Sedang'),
                   deadline: normalizeExcelDate(r.Deadline ?? r.deadline, getTodayISO()),
-                  status: String(r.Status || r.status || 'Baru').trim(),
+                  status: 'Baru',
                   sirupId: String(r.Kode_RUP || r.sirupId || '').trim(),
                   createdAt: getTodayISO()
                 };
+                syncRequestStatusChange(reqObj, r.Status || r.status || 'Baru');
+                return reqObj;
               }).filter(x => x.instansi);
               if (mode === 'replace' && mapped.length) state.requests = mapped;
               else mapped.forEach(item => {
@@ -3133,19 +3442,26 @@
 
             const processPrograms = (rows) => {
               if (!Array.isArray(state.programs)) state.programs = [];
-              const mapped = rows.map(r => ({
-                id: String(r.ID_Program || r.id || ('PRG-' + Math.floor(200 + Math.random() * 800))).trim(),
-                judul: String(r.Judul_Proposal || r.judul || '').trim(),
-                klpd: String(r.KLPD || r.klpd || 'Pemda').trim(),
-                satker: String(r.Satker || r.satker || 'Dinas Terkait').trim(),
-                sirupId: String(r.Kode_RUP || r.sirupId || '').trim(),
-                salesId: resolveSalesId(r.ID_Sales || r.salesId, r.Nama_Sales),
-                ringkasanProposal: String(r.Ringkasan_Proposal || r.ringkasanProposal || '-').trim(),
-                targetVisit: normalizeExcelDate(r.Target_Visit ?? r.targetVisit, getTodayISO()),
-                status: String(r.Status || r.status || 'Siap Visit').trim(),
-                waReportStatus: String(r.Status_WA_Report || r.waReportStatus || 'Belum Di-WA').trim(),
-                hasilKunjungan: String(r.Hasil_Kunjungan || r.hasilKunjungan || '').trim()
-              })).filter(x => x.judul);
+              const mapped = rows.map(r => {
+                const progObj = {
+                  id: String(r.ID_Program || r.id || ('PRG-' + Math.floor(200 + Math.random() * 800))).trim(),
+                  judul: String(r.Judul_Proposal || r.judul || '').trim(),
+                  klpd: String(r.KLPD || r.klpd || 'Pemda').trim(),
+                  satker: String(r.Satker || r.satker || 'Dinas Terkait').trim(),
+                  sirupId: String(r.Kode_RUP || r.sirupId || '').trim(),
+                  salesId: resolveSalesId(r.ID_Sales || r.salesId, r.Nama_Sales),
+                  ringkasanProposal: String(r.Ringkasan_Proposal || r.ringkasanProposal || '-').trim(),
+                  targetVisit: normalizeExcelDate(r.Target_Visit ?? r.targetVisit, getTodayISO()),
+                  status: 'Siap Visit',
+                  waReportStatus: normalizeWaStatus(r.Status_WA_Report || r.waReportStatus),
+                  hasilKunjungan: String(r.Hasil_Kunjungan || r.hasilKunjungan || '').trim()
+                };
+                syncProgramStatusChange(progObj, r.Status || r.status || 'Siap Visit');
+                if (r.Status_WA_Report || r.waReportStatus) {
+                  progObj.waReportStatus = normalizeWaStatus(r.Status_WA_Report || r.waReportStatus);
+                }
+                return progObj;
+              }).filter(x => x.judul);
               if (mode === 'replace' && mapped.length) state.programs = mapped;
               else mapped.forEach(item => {
                 const idx = state.programs.findIndex(x => x.id === item.id);
@@ -3173,7 +3489,7 @@
                   refId: String(r.Kode_Referensi || r.refId || '-').trim(),
                   judulProgram: String(r.Judul_Proposal_Request || r.judulProgram || instansi).trim(),
                   instansi: instansi || '-',
-                  hasil: String(r.Hasil_Kunjungan || r.hasil || 'Menunggu Anggaran').trim(),
+                  hasil: matchEnum(r.Hasil_Kunjungan || r.hasil, MASTER_ENUMS.VISIT_HASIL, 'Menunggu Anggaran'),
                   ringkasan: ringkasan || '-'
                 };
                 const idx = sls.history.findIndex(x => x.id === item.id);
@@ -3186,13 +3502,15 @@
             if (target === 'auto') {
               wb.SheetNames.forEach(name => {
                 const low = name.toLowerCase();
+                if (low.includes('panduan')) return;
                 if (low.includes('sales')) {
                   processSales(XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: '' }));
                 }
               });
               wb.SheetNames.forEach(name => {
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: '' });
                 const low = name.toLowerCase();
+                if (low.includes('panduan')) return;
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: '' });
                 if (low.includes('sirup')) processSirup(rows);
                 else if (low.includes('req')) processRequests(rows);
                 else if (low.includes('program') || low.includes('pusat')) processPrograms(rows);
@@ -3232,8 +3550,12 @@
       salesSelect.innerHTML = '<option value="">Semua Sales</option>' + state.sales.map(s => `<option value="${escapeHtml(s.id)}">[${escapeHtml(s.id)}] ${escapeHtml(s.nama)}</option>`).join('');
       salesSelect.value = curSales;
 
+      const statusSelect = document.getElementById('progFilterStatus');
+      const curStatus = statusSelect.value;
+      statusSelect.innerHTML = '<option value="">Semua Status</option>' + buildSelectOptions(MASTER_ENUMS.PROGRAM_STATUS, curStatus);
+
       const fSales = salesSelect.value;
-      const fStatus = document.getElementById('progFilterStatus').value;
+      const fStatus = statusSelect.value;
       const list = (state.programs || []).filter(p => (!fSales || p.salesId === fSales) && (!fStatus || p.status === fStatus));
 
       const grid = document.getElementById('programsGrid');
@@ -3253,13 +3575,15 @@
         'Follow-Up Selesai': 'bg-emerald-50 text-emerald-700 border-emerald-200'
       };
       const waColors = {
-        'Belum Di-WA': 'bg-slate-100 text-slate-600',
-        'Menunggu Laporan WA': 'bg-amber-100 text-amber-800',
-        'Sudah Lapor Hasil': 'bg-emerald-100 text-emerald-800'
+        'Belum Di-WA': 'bg-slate-100 text-slate-700 border-slate-200',
+        'Menunggu Balasan': 'bg-amber-100 text-amber-800 border-amber-200',
+        'Sudah Lapor': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        'Butuh Eskalasi': 'bg-rose-100 text-rose-800 border-rose-200'
       };
 
       list.forEach(p => {
         const sales = state.sales.find(s => s.id === p.salesId);
+        const normWa = normalizeWaStatus(p.waReportStatus);
         const card = document.createElement('div');
         card.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between gap-3';
         card.innerHTML = `
@@ -3269,8 +3593,13 @@
                 <span class="text-[11px] font-mono font-semibold text-indigo-600">${escapeHtml(p.id)}</span>
                 ${p.sirupId ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${escapeHtml(p.sirupId)}</span>` : ''}
               </div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${waColors[p.waReportStatus] || 'bg-slate-100 text-slate-600'}">WA: ${escapeHtml(p.waReportStatus)}</span>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <label class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${waColors[normWa] || 'bg-slate-100 text-slate-700'}">
+                  <span>WA:</span>
+                  <select data-prog-wa-status class="bg-transparent font-semibold focus:outline-none cursor-pointer">
+                    ${buildSelectOptions(MASTER_ENUMS.WA_STATUS, normWa)}
+                  </select>
+                </label>
                 <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${statusColors[p.status] || 'bg-slate-100 text-slate-600'}">${escapeHtml(p.status)}</span>
               </div>
             </div>
@@ -3291,11 +3620,8 @@
               <span>Target Visit: <strong class="text-slate-800">${escapeHtml(p.targetVisit)}</strong></span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <select class="flex-1 min-w-[130px] text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50">
-                <option value="Draft Pusat" ${p.status === 'Draft Pusat' ? 'selected' : ''}>Draft Pusat</option>
-                <option value="Siap Visit" ${p.status === 'Siap Visit' ? 'selected' : ''}>Siap Visit</option>
-                <option value="Sudah Visit" ${p.status === 'Sudah Visit' ? 'selected' : ''}>Sudah Visit</option>
-                <option value="Follow-Up Selesai" ${p.status === 'Follow-Up Selesai' ? 'selected' : ''}>Follow-Up Selesai</option>
+              <select data-prog-status class="flex-1 min-w-[130px] text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 font-medium">
+                ${buildSelectOptions(MASTER_ENUMS.PROGRAM_STATUS, p.status)}
               </select>
               <button data-action="wa" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1">
                 <i data-lucide="send" class="w-3.5 h-3.5"></i>
@@ -3308,17 +3634,24 @@
             </div>
           </div>
         `;
-        card.querySelector('select').addEventListener('change', (e) => {
-          p.status = e.target.value;
+        card.querySelector('[data-prog-wa-status]').addEventListener('change', (e) => {
+          p.waReportStatus = normalizeWaStatus(e.target.value);
+          if (sales) sales.waStatus = p.waReportStatus;
           saveState();
           renderAll();
-          showToast(`Status ${p.id} diperbarui ke "${p.status}".`, 'success');
+          showToast(`Status WA ${p.id} diubah menjadi "${p.waReportStatus}".`, 'success');
+        });
+        card.querySelector('[data-prog-status]').addEventListener('change', (e) => {
+          syncProgramStatusChange(p, e.target.value);
+          saveState();
+          renderAll();
+          showToast(`Status ${p.id} diperbarui ke "${p.status}" & tersinkron.`, 'success');
         });
         card.querySelector('[data-action="wa"]').addEventListener('click', () => {
           if (!sales) return;
           const msg = `Halo ${sales.nama}, tim Pusat sudah menyiapkan proposal *${p.judul}* untuk relasi KLPD *${p.klpd} (${p.satker})*.\n\nPoin Proposal:\n${p.ringkasanProposal}\n\nTarget visit: *${p.targetVisit}*. Mohon koordinasikan kunjungan dan laporkan hasil follow-up visit via WhatsApp ini ya. Terima kasih!`;
-          p.waReportStatus = 'Menunggu Laporan WA';
-          if (p.status === 'Draft Pusat') p.status = 'Siap Visit';
+          p.waReportStatus = 'Menunggu Balasan';
+          if (p.status === 'Draft Pusat') syncProgramStatusChange(p, 'Siap Visit');
           sales.waStatus = 'Menunggu Balasan';
           sales.lastWaSent = new Date().toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
           saveState();
@@ -3353,7 +3686,7 @@
               <input name="satker" required placeholder="Contoh: Dinas Pendidikan Kab. Boyolali" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Tugaskan Sales Visit</label>
               <select name="salesId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">${salesOpts}</select>
@@ -3361,6 +3694,12 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Target Tanggal Visit</label>
               <input name="targetVisit" type="date" required value="${getTodayISO()}" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Status Awal Program</label>
+              <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-semibold text-indigo-700">
+                ${buildSelectOptions(MASTER_ENUMS.PROGRAM_STATUS, 'Siap Visit')}
+              </select>
             </div>
           </div>
           <div>
@@ -3394,12 +3733,13 @@
           waReportStatus: 'Belum Di-WA',
           hasilKunjungan: ''
         };
+        syncProgramStatusChange(newProg, fd.get('status') || 'Siap Visit');
         if (!Array.isArray(state.programs)) state.programs = [];
         state.programs.unshift(newProg);
         saveState();
         closeModal();
         renderAll();
-        showToast(`Proposal Pusat ${newProg.id} siap untuk visit sales.`, 'success');
+        showToast(`Proposal Pusat ${newProg.id} (${newProg.status}) siap untuk visit sales.`, 'success');
       });
     }
 
@@ -3419,10 +3759,7 @@
             <div>
               <label class="block font-semibold text-slate-700 mb-1">Hasil Visit Relasi KLPD</label>
               <select name="hasil" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
-                <option value="Prospek Panas">Prospek Panas</option>
-                <option value="Menunggu Anggaran">Menunggu Anggaran</option>
-                <option value="Butuh Penawaran Ulang">Butuh Penawaran Ulang</option>
-                <option value="Batal / Kalah">Batal / Kalah</option>
+                ${buildSelectOptions(MASTER_ENUMS.VISIT_HASIL, 'Prospek Panas')}
               </select>
             </div>
             <div>
@@ -3448,11 +3785,11 @@
         e.preventDefault();
         const fd = new FormData(e.target);
         const tanggalVisit = fd.get('tanggalVisit') || getTodayISO();
-        const hasil = fd.get('hasil');
+        const hasil = matchEnum(fd.get('hasil'), MASTER_ENUMS.VISIT_HASIL, 'Menunggu Anggaran');
         const ringkasan = fd.get('ringkasan').trim();
-        prog.status = fd.get('status');
-        prog.waReportStatus = 'Sudah Lapor Hasil';
         prog.hasilKunjungan = `${tanggalVisit} • [${hasil}] ${ringkasan}`;
+        syncProgramStatusChange(prog, fd.get('status') || 'Follow-Up Selesai');
+        prog.waReportStatus = 'Sudah Lapor';
         if (sales) {
           sales.waStatus = 'Sudah Lapor';
           sales.history.push({
@@ -3469,7 +3806,7 @@
         saveState();
         closeModal();
         renderAll();
-        showToast(`Laporan visit ${prog.id} tersimpan ke Riwayat Database.`, 'success');
+        showToast(`Laporan visit ${prog.id} tersimpan & status WA menjadi Sudah Lapor.`, 'success');
       });
     }
 
@@ -3548,6 +3885,14 @@
 
     document.getElementById('waFilterStatus').addEventListener('change', renderFollowUp);
     document.getElementById('waSearchSales').addEventListener('input', renderFollowUp);
+    document.getElementById('selSalesWaStatusSelect')?.addEventListener('change', (e) => {
+      const sales = state.sales.find(s => s.id === selectedSalesId);
+      if (!sales) return;
+      sales.waStatus = normalizeWaStatus(e.target.value);
+      saveState();
+      renderAll();
+      showToast(`Status WA ${sales.nama} diubah menjadi "${sales.waStatus}".`, 'success');
+    });
     document.getElementById('waToneSelect').addEventListener('change', renderFollowUp);
     document.getElementById('waDraftTopicSelect').addEventListener('change', renderFollowUp);
     document.getElementById('btnRegenerateWA').addEventListener('click', () => {
